@@ -2,7 +2,7 @@
 
 #include "ros_msg_parser/ros_parser.hpp"
 
-#include "common/TopicNameHelper.h"
+#include "common/common.h"
 
 
 UavComMonitor* UavComMonitor::m_singleton = nullptr;

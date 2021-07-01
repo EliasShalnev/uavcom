@@ -2,7 +2,7 @@
 
 #include "uavcom/StreamTopic.h"
 
-#include "common/TopicNameHelper.h"
+#include "common/common.h"
 
 #include "uav_com/ReasonCodes.h"
 

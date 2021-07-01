@@ -1,6 +1,6 @@
 #include "com_sim/UavComSim.h"
 
-#include "common/TopicNameHelper.h"
+#include "common/common.h"
 
 
 UavComSim::UavComSim(ros::NodeHandle nodeHandle,  

@@ -3,7 +3,7 @@
 #include "ros_msg_parser/ros_parser.hpp"
 
 #include "uavcom/UavMessage.h"
-#include "common/TopicNameHelper.h"
+#include "common/common.h"
 
 #include "uav_com/ReasonCodes.h"
 
