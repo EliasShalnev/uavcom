@@ -20,10 +20,8 @@ add_compile_options(-std=c++17)
 ## is used, also find other catkin packages
 find_package(catkin REQUIRED COMPONENTS
     roscpp
-    mavros_msgs
-    std_msgs
-    message_generation
     ros_msg_parser
+    message_generation
 )
 
 ## System dependencies are found with CMake's conventions
@@ -81,7 +79,7 @@ add_service_files(
 ## Generate added messages and services with any dependencies listed here
 generate_messages(
   DEPENDENCIES
-  std_msgs  # Or other packages containing msgs
+  std_msgs
 )
 
 ################################################
@@ -114,13 +112,12 @@ generate_messages(
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
+ INCLUDE_DIRS include
 #  LIBRARIES uav_connection
  CATKIN_DEPENDS 
     roscpp 
-    mavros_msgs
-    message_runtime
     ros_msg_parser
+    message_runtime
     
 #  DEPENDS system_lib
 )
@@ -137,20 +134,6 @@ include_directories(
     ${ros_msg_parser_INCLUDE_DIRS}
 )
 
-
-## Declare a C++ library
-# add_library(uav_connection
-  # src/comm_sim/TcpTransport.cpp
-# ) 
-
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Declare a C++ executable
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
 add_executable(uav_com
                 # src/uav_com/QtROSNode.cpp
                 # src/uav_com/MasterAPI.cpp
@@ -160,6 +143,11 @@ add_executable(uav_com
                 src/uav_com/InputMonitor.cpp
                 src/uav_com/main.cpp
               )
+target_link_libraries(uav_com
+  ${catkin_LIBRARIES}
+  # Qt5::Core
+)
+add_dependencies(uav_com uavcom_generate_messages_cpp)
 
 add_executable(com_sim
                 src/com_sim/ComSimMonitor.cpp
@@ -167,30 +155,14 @@ add_executable(com_sim
                 src/com_sim/UavComSim.cpp
                 src/com_sim/main.cpp
               )
+target_link_libraries(com_sim
+  ${catkin_LIBRARIES}
+)
+add_dependencies(com_sim uavcom_generate_messages_cpp)
 
 add_executable(uavcom_test
                 src/uavcom_test/main.cpp
               )
-## Rename C++ executable without prefix
-## The above recommended prefix causes long target names, the following renames the
-## target back to the shorter version for ease of user use
-## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
-# set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
-
-## Add cmake target dependencies of the executable
-## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
-## Specify libraries to link a library or executable target against
-target_link_libraries(uav_com
-  ${catkin_LIBRARIES}
-  # Qt5::Core
-)
-
-target_link_libraries(com_sim
-  ${catkin_LIBRARIES}
-)
-
 target_link_libraries(uavcom_test
   ${catkin_LIBRARIES}
 )

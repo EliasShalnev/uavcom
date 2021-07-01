@@ -1,5 +1,7 @@
 #pragma once
 
+#include <functional>
+
 #include <ros/ros.h>
 
 #include "com_sim/UavComSimStore.h"
