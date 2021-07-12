@@ -7,6 +7,8 @@
 
 #include "uav_com/ReasonCodes.h"
 
+namespace def
+{
 
 StreamTopicServer::StreamTopicServer(ros::NodeHandle nodeHandle, ros::Publisher output) 
     : m_nodeHandle(nodeHandle)
@@ -76,3 +78,5 @@ bool StreamTopicServer::onStreamTopicRequest(uavcom::StreamTopic::Request& req,
 
     return true;
 }
+
+} //namespace def

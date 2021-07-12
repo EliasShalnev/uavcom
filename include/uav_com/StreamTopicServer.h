@@ -4,6 +4,9 @@
 
 #include "uavcom/StreamTopic.h"
 
+namespace def
+{
+
 class StreamTopicServer
 {
 public:
@@ -25,3 +28,5 @@ private:
 
     std::unordered_multimap<std::string, std::string> m_destinations;
 };
+
+} //namespace def

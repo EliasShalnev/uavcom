@@ -2,9 +2,11 @@
 
 #include <ros/ros.h>
 
-#include "uav_com/OutputMonitor.h"
-#include "uav_com/InputMonitor.h"
 
+namespace def
+{
+
+class UavCom;
 
 class UavComMonitor final
 {
@@ -40,7 +42,11 @@ private:
 
     const std::string m_getSystemState = "getSystemState";
 
-    OutputMonitor m_outputMonitor;
-    InputMonitor  m_inputMonitor;
+    const std::string MASTER = "scout"; 
+    const std::string SLAVE  = "bomber";
+
+    UavCom* m_uavCom = nullptr;
 };
 
+
+} //namespace def

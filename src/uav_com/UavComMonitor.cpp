@@ -1,8 +1,14 @@
 #include "uav_com/UavComMonitor.h"
 
-#include "ros_msg_parser/ros_parser.hpp"
+#include <ros_msg_parser/ros_parser.hpp>
 
 #include "common/common.h"
+
+#include "uav_com/UavCom.h"
+#include "uav_com/Slave.h"
+
+namespace def
+{
 
 
 UavComMonitor* UavComMonitor::m_singleton = nullptr;
@@ -30,9 +36,19 @@ UavComMonitor::UavComMonitor()
     : m_stateRequestTimer( m_nodeHandle.createTimer(ros::Duration(), 
                                                     &UavComMonitor::requestTimerCallback,
                                                     this, false, false) )
-    , m_outputMonitor(m_nodeHandle)
-    , m_inputMonitor(m_nodeHandle)
 {
+    const std::string nameSpace = ros::this_node::getNamespace();
+    if( nameSpace.find(MASTER) != std::string::npos )
+    {
+        //TODO new Master()
+        m_uavCom = new Slave(m_nodeHandle);
+    }
+    else if(nameSpace.find(SLAVE) != std::string::npos)
+    {
+        m_uavCom = new Slave(m_nodeHandle);
+    }
+    else { ROS_ERROR_STREAM("uav_com node can only be with " << MASTER << " or " << SLAVE << " namespaces"); }
+
     systemStateRequest();
     start( ros::Duration(2) ); //timer tick equals 2 sec by default
 }
@@ -53,17 +69,18 @@ void UavComMonitor::systemStateRequest()
         ROS_WARN_STREAM("XML RPC request was failled!");
         return;
     }
-    auto& publishedTopics = payload[0];
-    auto& subscribedTopics = payload[1];
+    const auto& publishedTopics = payload[0];
+    const auto& subscribedTopics = payload[1];
 
     forEachUavComTopic(publishedTopics, [this](const std::string& topicName)
     {
-        m_outputMonitor.redirectToOutput(topicName);
+        m_uavCom->redirectToOutput(topicName);
     });
 
     forEachUavComTopic(subscribedTopics, [this](const std::string& topicName)
     {
-        m_inputMonitor.streamTopicRequest(topicName);
+        // m_uavCom
+        // m_inputStream.streamTopicRequest(topicName);
     });
 }
 
@@ -83,10 +100,7 @@ void UavComMonitor::forEachUavComTopic(const XmlRpc::XmlRpcValue &topics,
             remoteTopic == std::string("/output") ) { continue; }
 
         //check if user is published 
-        if( !isUserNodeExists( topics[topicIndex][1] ) ) 
-        { 
-            continue; 
-        }
+        if( !isUserNodeExists( topics[topicIndex][1] ) ) { continue; }
 
         UnaryFunc(topicName);
     }
@@ -102,3 +116,5 @@ inline bool UavComMonitor::isUserNodeExists(const XmlRpc::XmlRpcValue &nodeNames
     return false;
 }
 
+
+} //namespace def

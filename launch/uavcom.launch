@@ -1,7 +1,7 @@
 <launch>
 
-    <node name="uav_com" pkg="uavcom" type="uav_com" output="screen" ns="uav1"/>
-    <node name="uav_com" pkg="uavcom" type="uav_com" output="screen" ns="uav2"/>
-    <node name="uav_com" pkg="uavcom" type="uav_com" output="screen" ns="uav3"/>
+    <node name="uav_com" pkg="uavcom" type="uav_com" output="screen" ns="scout1"/>
+    <node name="uav_com" pkg="uavcom" type="uav_com" output="screen" ns="bomber1"/>
+    <node name="uav_com" pkg="uavcom" type="uav_com" output="screen" ns="bomber2"/>
 	
 </launch>

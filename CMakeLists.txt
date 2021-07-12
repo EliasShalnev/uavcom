@@ -61,6 +61,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   UavMessage.msg
+  Heartbeat.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -138,9 +139,10 @@ add_executable(uav_com
                 # src/uav_com/QtROSNode.cpp
                 # src/uav_com/MasterAPI.cpp
                 src/uav_com/UavComMonitor.cpp
-                src/uav_com/OutputMonitor.cpp
-                src/uav_com/StreamTopicServer.cpp
-                src/uav_com/InputMonitor.cpp
+                src/uav_com/Slave.cpp
+                src/uav_com/OutputUavStream.cpp
+                src/uav_com/InputUavStream.cpp
+                # src/uav_com/StreamTopicServer.cpp
                 src/uav_com/main.cpp
               )
 target_link_libraries(uav_com

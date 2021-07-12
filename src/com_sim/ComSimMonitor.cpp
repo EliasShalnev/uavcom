@@ -2,6 +2,7 @@
 
 #include "com_sim/UavComSim.h"
 
+
 ComSimMonitor* ComSimMonitor::m_singleton = nullptr;
 
 

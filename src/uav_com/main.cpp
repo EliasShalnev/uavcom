@@ -10,7 +10,7 @@ int main(int argc, char **argv)
 {
     ros::init(argc, argv, nodeName);
 
-    auto topicMonitor = UavComMonitor::getInstance();
+    auto topicMonitor = def::UavComMonitor::getInstance();
 
     ros::spin();
     
