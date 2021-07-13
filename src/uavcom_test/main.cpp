@@ -16,10 +16,10 @@ int main(int argc, char **argv)
 
     ros::NodeHandle nodeHandle;
 
-    ros::Subscriber sub1 = nodeHandle.subscribe("/uav1/uav_com/uav3/topic1", 10, 
+    ros::Subscriber sub1 = nodeHandle.subscribe("/bomber1/uav_com/scout1/topic1", 10, 
                                                 callback1);
 
-    ros::Subscriber sub2 = nodeHandle.subscribe("/uav2/uav_com/uav3/topic1", 10,
+    ros::Subscriber sub2 = nodeHandle.subscribe("/bomber2/uav_com/scout1/topic1", 10,
                                                 callback2);
 
     ros::spin();

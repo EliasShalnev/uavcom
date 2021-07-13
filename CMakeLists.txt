@@ -142,7 +142,6 @@ add_executable(uav_com
                 src/uav_com/Slave.cpp
                 src/uav_com/OutputUavStream.cpp
                 src/uav_com/InputUavStream.cpp
-                # src/uav_com/StreamTopicServer.cpp
                 src/uav_com/main.cpp
               )
 target_link_libraries(uav_com

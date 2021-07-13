@@ -15,47 +15,14 @@ InputUavStream::InputUavStream(ros::NodeHandle nodeHandle, const std::string& st
                                                          &InputUavStream::inputHandle, this) )
 { }
 
-// void InputUavStream::streamTopicRequest(const std::string& topicName) 
-// {
-//     //TODO create auto delete when unsubscribe
-    
-//     //check if subscribed topic have already published by this node
-//     if( m_fromInputTopics.end() != m_fromInputTopics.find(topicName) ) { return; }
 
-//     std::string remoteTopicName = getRemoteTopicName(topicName);
-//     std::string destination = getFirstSegment(topicName);
-
-//     uavcom::StreamTopic streamTopic;
-//     streamTopic.request.topicName = remoteTopicName;
-//     streamTopic.request.destination = destination;
-
-//     std::string serviceName = getFirstSegment(remoteTopicName) + "/stream_topic_service";
-  
-//     ros::ServiceClient streamTopicCLient = m_nodeHandle.serviceClient<uavcom::StreamTopic>(serviceName);
-
-//     if( streamTopicCLient.call(streamTopic) )
-//     { 
-//         const auto& status = streamTopic.response.status;
-
-//         //TODO create publisher to stop spam with request 
-
-//         //Only for log
-//         if(status == StreamTopic::OK) {
-//             ROS_INFO_STREAM("Stream topic request [topicName=" << remoteTopicName <<
-//                             ", destination=" << destination << "] was accepted.");
-//         } else {
-//             ROS_WARN_STREAM("Stream topic request [topicName=" << remoteTopicName << 
-//                             ", destination=" << destination << "] was denied. "
-//                             "[Reason] " << StreamTopic::codeExplanation(status));
-//         }
-//     } else {
-//         ROS_WARN_STREAM("Stream topic request [topicName=" << remoteTopicName << 
-//                         ", destination=" << destination << "] was denied.");
-//     }
-// }
+bool InputUavStream::contains(const TopicName& topicName) const
+{
+    return m_fromInputTopics.end() !=  m_fromInputTopics.find(topicName);
+}
 
 
-bool InputUavStream::isReachable(const std::string& boardName) 
+bool InputUavStream::isReachable(const std::string& boardName) const
 {
     std::string heartbeatTopic = ros::this_node::getNamespace() + boardName + HEARTBEAT;
 

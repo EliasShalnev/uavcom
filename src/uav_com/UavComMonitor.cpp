@@ -79,8 +79,7 @@ void UavComMonitor::systemStateRequest()
 
     forEachUavComTopic(subscribedTopics, [this](const std::string& topicName)
     {
-        // m_uavCom
-        // m_inputStream.streamTopicRequest(topicName);
+        m_uavCom->streamTopicRequest(topicName);
     });
 }
 

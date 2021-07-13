@@ -15,6 +15,7 @@ public:
     virtual ~UavCom() = default;
 
     virtual void redirectToOutput(const TopicName& topicName) = 0;
+    virtual void streamTopicRequest(const TopicName& topicName) = 0;
 
 protected:
     // virtual bool containsInOutput(const TopicName& topicName) = 0;

@@ -23,9 +23,10 @@ public:
     InputUavStream& operator=(const InputUavStream&) = delete;
     ~InputUavStream() = default;
 
-    bool isReachable(const Destination& boardName);
+    bool contains(const TopicName& topicName) const;
 
-    // void streamTopicRequest(const std::string& topicName);
+    bool isReachable(const Destination& boardName) const ;
+
 
 private:
     void inputHandle(const uavcom::UavMessage::ConstPtr& uavMessage);

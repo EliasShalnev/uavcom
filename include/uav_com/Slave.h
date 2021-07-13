@@ -21,6 +21,8 @@ public:
 
     void redirectToOutput(const TopicName& topicName) override;
 
+    void streamTopicRequest(const TopicName& topicName) override;
+
 protected:
     // bool containsInOutput(const TopicName& topicName) override; 
     OutputUavStream* getReachableOutput(const Destination& destination) override;
@@ -29,6 +31,8 @@ protected:
     ros::NodeHandle m_nodeHandle;
     InputUavStream  m_input;
     OutputUavStream m_output;
+
+    const std::string STREAM_TOPIC_SRV_NAME = "stream_topic_service";
 
     /****Server****/
     class StreamTopicServer{

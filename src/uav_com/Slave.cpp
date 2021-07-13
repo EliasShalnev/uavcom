@@ -1,5 +1,7 @@
 #include "uav_com/Slave.h"
 
+#include "uavcom/StreamTopic.h"
+
 #include "uav_com/ReasonCodes.h"
 
 namespace def {
@@ -26,6 +28,12 @@ void Slave::redirectToOutput(const TopicName& topicName)
 }
 
 
+void Slave::streamTopicRequest(const TopicName& topicName) 
+{
+    m_streamTopicClient.streamTopicRequest(topicName);
+}
+
+
 // bool Slave::containsInOutput(const TopicName& topicName) 
 // {
     // return m_output.contains(topicName);
@@ -41,7 +49,7 @@ OutputUavStream* Slave::getReachableOutput(const Destination& destination)
 
 Slave::StreamTopicServer::StreamTopicServer(Slave* enclose) 
     : m_enclose(enclose)
-    , m_server( enclose->m_nodeHandle.advertiseService("stream_topic_service",
+    , m_server( enclose->m_nodeHandle.advertiseService(enclose->STREAM_TOPIC_SRV_NAME,
                                                        &Slave::StreamTopicServer::onStreamTopicRequest,
                                                        this) )    
 {}
@@ -116,7 +124,42 @@ Slave::StreamTopicClient::StreamTopicClient(Slave* enclose)
 
 void Slave::StreamTopicClient::streamTopicRequest(const std::string& topicName) 
 {
+    //TODO create auto delete when unsubscribe
+    
+    //check if subscribed topic have already published by this node
+    if( m_enclose->m_input.contains(topicName) ) { return; }
 
+    std::string remoteTopicName = getRemoteTopicName(topicName);
+    std::string destination = ros::this_node::getNamespace();
+
+    uavcom::StreamTopic streamTopic;
+    streamTopic.request.topicName = remoteTopicName;
+    streamTopic.request.destination = destination;
+
+    const std::string serviceName = getFirstSegment(remoteTopicName) + '/' + m_enclose->STREAM_TOPIC_SRV_NAME;
+
+    ros::ServiceClient streamTopicCLient = m_enclose->m_nodeHandle.serviceClient<uavcom::StreamTopic>(serviceName);
+
+    ROS_INFO_STREAM("Calling " << serviceName << " service.");
+    if( streamTopicCLient.call(streamTopic) )
+    {
+        const auto& status = streamTopic.response.status;
+
+        //TODO maybe create publisher to stop spam with request 
+
+        //Only for log
+        if(status == StreamTopic::OK) {
+            ROS_INFO_STREAM("Stream topic request [topicName=" << remoteTopicName <<
+                            ", destination=" << destination << "] was accepted.");
+        } else {
+            ROS_WARN_STREAM("Stream topic request [topicName=" << remoteTopicName << 
+                            ", destination=" << destination << "] was denied. "
+                            "[Reason] " << StreamTopic::codeExplanation(status));
+        }
+    } else {
+        ROS_WARN_STREAM("Stream topic request [topicName=" << remoteTopicName << 
+                        ", destination=" << destination << "] was denied.");
+    }
 }
 
 
