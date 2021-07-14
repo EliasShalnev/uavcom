@@ -15,8 +15,8 @@ class Slave : public UavCom
 {
 public:
     Slave(ros::NodeHandle nodeHandle);
-    Slave(const Slave& origin) = delete;
-    Slave& operator=(const Slave& origin) = delete;
+    Slave(const Slave&) = delete;
+    Slave& operator=(const Slave&) = delete;
     virtual ~Slave() = default;
 
     void redirectToOutput(const TopicName& topicName) override;

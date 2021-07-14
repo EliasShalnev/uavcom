@@ -2,9 +2,18 @@
 
 #include "uavcom/Heartbeat.h"
 
+#include "uav_com/UavComMonitor.h"
 
-namespace def
-{
+
+namespace def {
+
+ros::Publisher OutputUavStream::m_heartbeatPub = def::UavComMonitor::getInstance()->getNodeHandle()
+                                                 .advertise<uavcom::Heartbeat>(ros::this_node::getName() + BROADCAST + 
+                                                                               ros::this_node::getNamespace() + HEARTBEAT, 10);
+
+ros::Timer OutputUavStream::m_heartbeatTimer = def::UavComMonitor::getInstance()->getNodeHandle()
+                                               .createTimer(ros::Duration(0.2),
+                                                            &OutputUavStream::publishHeartBeat);
 
 
 OutputUavStream::OutputUavStream(ros::NodeHandle nodeHandle, const std::string& streamName)
@@ -13,11 +22,11 @@ OutputUavStream::OutputUavStream(ros::NodeHandle nodeHandle, const std::string& 
     , m_subCheckTimer( nodeHandle.createTimer(ros::Duration(5), 
                                               &OutputUavStream::checkSubscribers,
                                               this) )
-    , m_heartbeatPub( nodeHandle.advertise<uavcom::Heartbeat>(ros::this_node::getName() + BROADCAST + 
-                                                              ros::this_node::getNamespace() + HEARTBEAT, 10) )
-    , m_heartbeatTimer( nodeHandle.createTimer(ros::Duration(0.2),
-                                               &OutputUavStream::publishHeartBeat,
-                                               this) )
+    // , m_heartbeatPub( nodeHandle.advertise<uavcom::Heartbeat>(ros::this_node::getName() + BROADCAST + 
+    //                                                           ros::this_node::getNamespace() + HEARTBEAT, 10) )
+    // , m_heartbeatTimer( nodeHandle.createTimer(ros::Duration(0.2),
+                                            //    &OutputUavStream::publishHeartBeat,
+                                            //    this) )
 { 
     const std::string heartBeatTopicName = ros::this_node::getName() + BROADCAST + 
                                            ros::this_node::getNamespace() + HEARTBEAT;

@@ -10,8 +10,8 @@ class UavCom
 {
 public:
     UavCom() = default;
-    UavCom(const UavCom& origin) = delete;
-    UavCom& operator=(const UavCom& origin) = delete;
+    UavCom(const UavCom&) = delete;
+    UavCom& operator=(const UavCom&) = delete;
     virtual ~UavCom() = default;
 
     virtual void redirectToOutput(const TopicName& topicName) = 0;

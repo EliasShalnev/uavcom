@@ -16,6 +16,8 @@ public:
     UavComMonitor& operator=(const UavComMonitor& origin) = delete;
     ~UavComMonitor() = default;
 
+    ros::NodeHandle getNodeHandle() { return m_nodeHandle; }
+
     void start(const ros::Duration &duration);
 
     void stop();

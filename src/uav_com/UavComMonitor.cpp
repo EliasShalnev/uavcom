@@ -6,9 +6,9 @@
 
 #include "uav_com/UavCom.h"
 #include "uav_com/Slave.h"
+#include "uav_com/Master.h"
 
-namespace def
-{
+namespace def {
 
 
 UavComMonitor* UavComMonitor::m_singleton = nullptr;
@@ -41,7 +41,7 @@ UavComMonitor::UavComMonitor()
     if( nameSpace.find(MASTER) != std::string::npos )
     {
         //TODO new Master()
-        m_uavCom = new Slave(m_nodeHandle);
+        m_uavCom = new Master(m_nodeHandle);
     }
     else if(nameSpace.find(SLAVE) != std::string::npos)
     {

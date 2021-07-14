@@ -20,10 +20,9 @@ void Slave::redirectToOutput(const TopicName& topicName)
     auto remoteTopic = getRemoteTopicName(topicName);
     auto destination = getFirstSegment(remoteTopic);
 
-    if( m_input.isReachable(destination) )
-    {
-        m_output.redirectToOutput(topicName);
-    }
+    OutputUavStream* outputUavStream = getReachableOutput(destination);
+
+    if( nullptr != outputUavStream ) { outputUavStream->redirectToOutput(topicName); }
     else { ROS_INFO_STREAM("Destination " << destination << " is unreachable."); }
 }
 
