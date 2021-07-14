@@ -35,17 +35,12 @@ public:
 private:
     void checkSubscribers(const ros::TimerEvent& event);
 
-    static void publishHeartBeat(const ros::TimerEvent& event);
-
 private:
     ros::NodeHandle m_nodeHandle;
 
     ros::Publisher m_output; //"output" topic Publisher
     std::unordered_map<TopicName, ros::Subscriber> m_toOutputTopics; //topics redirected to "output" topic
     ros::Timer m_subCheckTimer;
-
-    static ros::Publisher m_heartbeatPub;
-    static ros::Timer m_heartbeatTimer;
 };
 
 

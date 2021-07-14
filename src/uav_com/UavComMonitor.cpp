@@ -40,7 +40,6 @@ UavComMonitor::UavComMonitor()
     const std::string nameSpace = ros::this_node::getNamespace();
     if( nameSpace.find(MASTER) != std::string::npos )
     {
-        //TODO new Master()
         m_uavCom = new Master(m_nodeHandle);
     }
     else if(nameSpace.find(SLAVE) != std::string::npos)
