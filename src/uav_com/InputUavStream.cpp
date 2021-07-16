@@ -24,7 +24,7 @@ bool InputUavStream::contains(const TopicName& topicName) const
 
 bool InputUavStream::isReachable(const std::string& boardName) const
 {
-    std::string heartbeatTopic = ros::this_node::getNamespace() + boardName + HEARTBEAT;
+    std::string heartbeatTopic = ros::this_node::getNamespace() + boardName + g_heartbeat;
 
     if( m_fromInputTopics.find(heartbeatTopic) != m_fromInputTopics.end() ) { return true; }
     return false;
@@ -39,7 +39,7 @@ void InputUavStream::inputHandle(const uavcom::UavMessage::ConstPtr& uavMsg)
     //filter not for this node msgs
     if( ns != ros::this_node::getNamespace() ) 
     { 
-        if(ns != BROADCAST) { return; }
+        if(ns != g_broadcast) { return; }
         auto newTopicName = deleteFirstSegment(topicName);
         topicName = ros::this_node::getNamespace() + newTopicName;
     } 

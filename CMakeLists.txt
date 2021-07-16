@@ -153,8 +153,9 @@ add_dependencies(uav_com uavcom_generate_messages_cpp)
 
 add_executable(com_sim
                 src/com_sim/ComSimMonitor.cpp
-                src/com_sim/UavComSimStore.cpp
-                src/com_sim/UavComSim.cpp
+                src/com_sim/ComSimObserver.cpp
+                src/com_sim/ComSim.cpp
+                src/com_sim/SlaveChecker.cpp
                 src/com_sim/main.cpp
               )
 target_link_libraries(com_sim

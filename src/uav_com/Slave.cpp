@@ -8,8 +8,8 @@ namespace def {
 
 Slave::Slave(ros::NodeHandle nodeHandle) 
     : m_nodeHandle(nodeHandle)
-    , m_input(nodeHandle, "input")
-    , m_output(nodeHandle, "output")
+    , m_input(nodeHandle, g_input)
+    , m_output(nodeHandle, g_output)
     , m_streamTopicServer(this)
     , m_streamTopicClient(this)
 { }
@@ -23,7 +23,7 @@ void Slave::redirectToOutput(const TopicName& topicName)
     OutputUavStream* outputUavStream = getReachableOutput(destination);
 
     if( nullptr != outputUavStream ) { outputUavStream->redirectToOutput(topicName); }
-    else { ROS_INFO_STREAM("Destination " << destination << " is unreachable."); }
+    else { ROS_WARN_STREAM("Destination " << destination << " is unreachable."); }
 }
 
 
@@ -39,7 +39,7 @@ void Slave::streamTopicRequest(const TopicName& topicName)
 // }
 
 
-OutputUavStream* Slave::getReachableOutput(const Destination& destination)
+OutputUavStream* Slave::getReachableOutput(const BoardName& destination)
 {
     if( m_input.isReachable(destination) ) { return &m_output; } //FIXME: potential error. Bad interface. Probably return weak_ptr or smth
     return nullptr;
@@ -57,11 +57,12 @@ Slave::StreamTopicServer::StreamTopicServer(Slave* enclose)
 bool Slave::StreamTopicServer::onStreamTopicRequest(uavcom::StreamTopic::Request& req,
                                                     uavcom::StreamTopic::Response& res) 
 {
-    const std::string topicName = req.topicName;
-    const std::string destination = req.destination;
+    const TopicName topicName = req.topicName;
+    const BoardName destination = req.destination;
     
     OutputUavStream* outpuUavStream = m_enclose->getReachableOutput(destination);
 
+    //check if publishers exists
     if(nullptr == outpuUavStream) { res.status = StreamTopic::IsUnreachable; }
     else if( isDestExist(topicName, destination) ) { res.status = StreamTopic::IsStreaming; }
     else
@@ -78,7 +79,7 @@ bool Slave::StreamTopicServer::onStreamTopicRequest(uavcom::StreamTopic::Request
                 {
                     std::string destination = destIt->second;
                     uavcom::UavMessage::Ptr uavMessage(new uavcom::UavMessage);
-                    uavMessage->topicName = destination + "/uav_com" + topicName;
+                    uavMessage->topicName = destination + '/' + g_uavNodeName + topicName;
                     uavMessage->MD5Sum = msg->getMD5Sum();
                     uavMessage->dataType = msg->getDataType();
                     getByteArray( *msg, uavMessage->byteArray );
@@ -104,8 +105,8 @@ bool Slave::StreamTopicServer::onStreamTopicRequest(uavcom::StreamTopic::Request
 }
 
 
-inline bool Slave::StreamTopicServer::isDestExist(const std::string& topicName, 
-                                                  const std::string& dest) const
+inline bool Slave::StreamTopicServer::isDestExist(const TopicName& topicName, 
+                                                  const BoardName& dest) const
 {
     auto [beginDest, endDest] = m_destinations.equal_range(topicName);
     for(auto destIt = beginDest; destIt != endDest; ++destIt)
@@ -121,15 +122,15 @@ Slave::StreamTopicClient::StreamTopicClient(Slave* enclose)
 { }
 
 
-void Slave::StreamTopicClient::streamTopicRequest(const std::string& topicName) 
+void Slave::StreamTopicClient::streamTopicRequest(const TopicName& topicName) 
 {
     //TODO create auto delete when unsubscribe
     
     //check if subscribed topic have already published by this node
     if( m_enclose->m_input.contains(topicName) ) { return; }
 
-    std::string remoteTopicName = getRemoteTopicName(topicName);
-    std::string destination = ros::this_node::getNamespace();
+    TopicName remoteTopicName = getRemoteTopicName(topicName);
+    BoardName destination = ros::this_node::getNamespace();
 
     uavcom::StreamTopic streamTopic;
     streamTopic.request.topicName = remoteTopicName;
@@ -160,8 +161,6 @@ void Slave::StreamTopicClient::streamTopicRequest(const std::string& topicName)
                         ", destination=" << destination << "] was denied.");
     }
 }
-
-
 
 
 } //namespace def

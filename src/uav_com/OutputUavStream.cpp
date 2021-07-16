@@ -15,8 +15,8 @@ OutputUavStream::OutputUavStream(ros::NodeHandle nodeHandle, const std::string& 
                                               &OutputUavStream::checkSubscribers,
                                               this) )
 { 
-    const std::string heartBeatTopicName = ros::this_node::getName() + BROADCAST + 
-                                           ros::this_node::getNamespace() + HEARTBEAT;
+    const std::string heartBeatTopicName = ros::this_node::getName() + g_broadcast + 
+                                           ros::this_node::getNamespace() + g_heartbeat;
     redirectToOutput(heartBeatTopicName);
 }
 
@@ -33,7 +33,6 @@ void OutputUavStream::redirectToOutput(const std::string& topicName)
         //preparing output topic msg
         uavcom::UavMessage::Ptr uavMessage(new uavcom::UavMessage);
         uavMessage->topicName = getRemoteTopicName(topicName);
-        uavMessage->from = ros::this_node::getNamespace();
         uavMessage->MD5Sum = msg->getMD5Sum();
         uavMessage->dataType = msg->getDataType();
         getByteArray( *msg, uavMessage->byteArray );
@@ -63,14 +62,16 @@ void OutputUavStream::checkSubscribers(const ros::TimerEvent& event)
 {
     for( auto it = m_toOutputTopics.begin(); it != m_toOutputTopics.end(); )
     {
-        if(it->second.getNumPublishers() == 0)
-        {
-            auto tpName = it->first;
-
-            it = m_toOutputTopics.erase(it);
-            ROS_INFO_STREAM("Unsubscribing from: " << tpName);
+        auto topicName = it->first;
+        if( isUavcomTopic(topicName) )
+        { 
+            if(it->second.getNumPublishers() == 0)
+            {
+                it = m_toOutputTopics.erase(it);
+                ROS_INFO_STREAM("Unsubscribing from: " << topicName);
+            }
         }
-        else { ++it; }
+        ++it;
     }
 }
 

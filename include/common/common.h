@@ -6,9 +6,15 @@ namespace def
 {
     
 using TopicName = std::string;
-using Destination = std::string;
-const std::string BROADCAST = "/broadcast";
-const std::string HEARTBEAT = "/heartbeat";
+using BoardName = std::string;
+
+/****Globals****/
+const std::string g_uavNodeName = "uav_com";
+const std::string g_input = "input";
+const std::string g_output = "output";
+const std::string g_cone = "cone_";
+const std::string g_broadcast = "/broadcast";
+const std::string g_heartbeat = "/heartbeat"; //TODO - delete slash
 
 inline bool isUavcomTopic(const std::string &topicName)
 {
@@ -33,6 +39,7 @@ inline std::string getFirstSegment(const std::string& topicName)
     auto pos = topicName.find('/', 1); //find second slash
     return topicName.substr(0, pos);
 }
+
 
 inline std::string deleteFirstSegment(const std::string& topicName)
 {

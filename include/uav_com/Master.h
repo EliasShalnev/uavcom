@@ -18,7 +18,7 @@ public:
     void streamTopicRequest(const TopicName& topicName) override;
 
 protected:
-    OutputUavStream* getReachableOutput(const Destination& destination) override;
+    OutputUavStream* getReachableOutput(const BoardName& destination) override;
 
 protected:
     InputUavStream  m_coneInput;

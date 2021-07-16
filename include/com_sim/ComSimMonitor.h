@@ -2,7 +2,7 @@
 
 #include <ros/ros.h>
 
-#include "com_sim/UavComSimStore.h"
+#include "com_sim/ComSimObserver.h"
 
 class ComSimMonitor final
 {
@@ -23,15 +23,13 @@ private:
 
     void systemStateRequest();
 
-    void checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTopics);
-
 private:
     static ComSimMonitor* m_singleton;
 
     ros::NodeHandle m_nodeHandle;
     ros::Timer m_requestTimer;
 
-    UavComSimStore m_uavComSimStore;
+    ComSimObserver m_uavComSimStore;
 
     const std::string m_getSystemState = "getSystemState";
 };

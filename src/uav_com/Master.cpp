@@ -7,8 +7,8 @@ namespace def {
 
 Master::Master(ros::NodeHandle& nodeHandle) 
     : Slave(nodeHandle)
-    , m_coneInput(nodeHandle, "cone_input")
-    , m_coneOutput(nodeHandle, "cone_output")
+    , m_coneInput(nodeHandle, g_cone+g_input)
+    , m_coneOutput(nodeHandle, g_cone+g_output)
 { }
 
 
@@ -24,7 +24,7 @@ void Master::streamTopicRequest(const TopicName& topicName)
 }
 
 
-OutputUavStream* Master::getReachableOutput(const Destination& destination) 
+OutputUavStream* Master::getReachableOutput(const BoardName& destination) 
 {
     OutputUavStream* outputUavStream = Slave::getReachableOutput(destination);
     if( nullptr != outputUavStream ) { return outputUavStream; } 

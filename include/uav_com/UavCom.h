@@ -19,7 +19,7 @@ public:
 
 protected:
     // virtual bool containsInOutput(const TopicName& topicName) = 0;
-    virtual OutputUavStream* getReachableOutput(const Destination& destination) = 0;
+    virtual OutputUavStream* getReachableOutput(const BoardName& destination) = 0;
 };
 
 } //namespace def

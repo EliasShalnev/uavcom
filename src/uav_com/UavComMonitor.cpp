@@ -94,8 +94,10 @@ void UavComMonitor::forEachUavComTopic(const XmlRpc::XmlRpcValue &topics,
         if( !isUavcomTopic(topicName) ) { continue; }
 
         const std::string remoteTopic = getRemoteTopicName(topicName);
-        if( remoteTopic == std::string("/input") || 
-            remoteTopic == std::string("/output") ) { continue; }
+        if( remoteTopic == std::string('/'+g_input) || 
+            remoteTopic == std::string('/'+g_output) ||
+            remoteTopic == std::string('/'+g_cone+g_input) ||
+            remoteTopic == std::string('/'+g_cone+g_output) ) { continue; }
 
         //check if user is published 
         if( !isUserNodeExists( topics[topicIndex][1] ) ) { continue; }

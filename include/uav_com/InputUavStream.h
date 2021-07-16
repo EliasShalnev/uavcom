@@ -25,7 +25,7 @@ public:
 
     bool contains(const TopicName& topicName) const;
 
-    bool isReachable(const Destination& boardName) const ;
+    bool isReachable(const BoardName& boardName) const ;
 
 
 private:

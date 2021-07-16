@@ -25,7 +25,7 @@ public:
 
 protected:
     // bool containsInOutput(const TopicName& topicName) override; 
-    OutputUavStream* getReachableOutput(const Destination& destination) override;
+    OutputUavStream* getReachableOutput(const BoardName& destination) override;
 
 protected:
     ros::NodeHandle m_nodeHandle;
@@ -43,15 +43,15 @@ protected:
         ~StreamTopicServer() = default;
 
     private:
-        inline bool isDestExist(const std::string& topicName, 
-                                const std::string& dest) const;
+        inline bool isDestExist(const TopicName& topicName, 
+                                const BoardName& dest) const;
         bool onStreamTopicRequest(uavcom::StreamTopic::Request& req,
                                   uavcom::StreamTopic::Response& res);
 
     private:
         Slave* m_enclose;
         ros::ServiceServer m_server; //starting streaming requested topic to "output" topic
-        std::unordered_multimap<TopicName, Destination> m_destinations;
+        std::unordered_multimap<TopicName, BoardName> m_destinations;
     } m_streamTopicServer;
 
     /****Client****/
@@ -62,7 +62,7 @@ protected:
         StreamTopicClient& operator=(const StreamTopicClient&) = delete;
         ~StreamTopicClient() = default;
 
-        void streamTopicRequest(const std::string& topicName);
+        void streamTopicRequest(const TopicName& topicName);
 
     private:
         Slave* m_enclose;
