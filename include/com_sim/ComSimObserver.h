@@ -3,14 +3,10 @@
 #include <unordered_map>
 #include <string>
 
-#include <geometry_msgs/PoseStamped.h>
-
-#include "common/common.h"
-
 #include "uavcom/UavMessage.h"
 
+#include "com_sim/ComSim.h"
 
-class ComSim;
 
 class ComSimObserver
 {
@@ -20,12 +16,12 @@ public:
     ComSimObserver& operator=(const ComSimObserver& orig) = delete;
     ~ComSimObserver();
 
-    void publishToInput(const def::BoardName& from, 
+    void publishToInput(const ComSim::IOName& fromIoName, 
                         const uavcom::UavMessage::ConstPtr& uavMessage);
 
     void checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTopics);
 
 private:
-    std::unordered_map<def::BoardName, ComSim*> m_store;
+    std::unordered_map<ComSim::IOName, ComSim*> m_store; //TODO - заменить на shared_ptr
 };
 

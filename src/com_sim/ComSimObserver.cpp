@@ -1,9 +1,8 @@
 #include "com_sim/ComSimObserver.h"
 
-#include <memory>
-
 #include "com_sim/ComSim.h"
-#include "com_sim/SlaveChecker.h"
+#include "com_sim/SlaveComSim.h"
+#include "com_sim/MasterComSim.h"
 
 ComSimObserver::~ComSimObserver() 
 {
@@ -11,25 +10,16 @@ ComSimObserver::~ComSimObserver()
 }
 
 
-void ComSimObserver::publishToInput(const def::BoardName& from, 
+void ComSimObserver::publishToInput(const ComSim::IOName& fromIoName, 
                                     const uavcom::UavMessage::ConstPtr& uavMessage) 
 {
-    std::unique_ptr<ComChecker> comChecker(nullptr);
-    if( from.find(ComSim::bomber) ) { comChecker.reset(new SlaveChecker); }
-    else if( from.find(ComSim::scout) ) { /*checkAsScout*/ }
-    else { ROS_ERROR_STREAM("Unknown uav type " << from); return; }
-    
-    auto fromComSim = m_store.find(from);
+    auto fromComSim = m_store.find(fromIoName);
     
     for(auto toComSim : m_store)
     {
-        if(from == toComSim.first) { continue; }
+        if(fromIoName == toComSim.first) { continue; }
 
-        if(comChecker == nullptr) { continue; }
-        if( comChecker->check(*fromComSim->second, *toComSim.second) )
-        {
-            toComSim.second->publishToInput(uavMessage);
-        }
+        toComSim.second->publishToInput( fromComSim->second, uavMessage);
     }
 }
 
@@ -39,7 +29,6 @@ void ComSimObserver::checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTo
     for(int topicIndex=0; topicIndex < publishedTopics.size(); ++topicIndex)
     {
         auto topicName = def::TopicName( publishedTopics[topicIndex][0] );
-        // std::string ioPrefix;
         ComSim::IOType ioType;
 
         //проверка топика на /cone_output
@@ -78,9 +67,16 @@ void ComSimObserver::checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTo
         }
         else { ROS_ERROR_STREAM("Unknown type " << ioType; ); }
 
-        if( m_store.end() != m_store.find(boardName) ) { continue; }
+        std::string interface = boardName +'/' + ComSim::IOTypeToStr(ioType);
+        if( m_store.end() != m_store.find(interface) ) { continue; }
 
-        ROS_INFO_STREAM("find " << topicName);
-        m_store.emplace( boardName, new ComSim(boardName, ioType, *this) );
+        ComSim* newComSim;
+        if(ioType == ComSim::Slave) { newComSim = new SlaveComSim(boardName, *this); }
+        else if(ioType == ComSim::Master) { newComSim = new MasterComSim(boardName, *this); }
+
+        ROS_INFO_STREAM("find " << interface);
+        m_store.emplace( interface, newComSim );
     }
 }
+
+

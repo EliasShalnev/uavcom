@@ -29,7 +29,7 @@ private:
     ros::NodeHandle m_nodeHandle;
     ros::Timer m_requestTimer;
 
-    ComSimObserver m_uavComSimStore;
+    ComSimObserver m_comSimObserver;
 
     const std::string m_getSystemState = "getSystemState";
 };

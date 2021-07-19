@@ -50,5 +50,5 @@ void ComSimMonitor::systemStateRequest()
     }
     auto& publishedTopics = payload[0];
 
-    m_uavComSimStore.checkPublishedTopics(publishedTopics);
+    m_comSimObserver.checkPublishedTopics(publishedTopics);
 }

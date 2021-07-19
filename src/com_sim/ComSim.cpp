@@ -1,25 +1,40 @@
 #include "com_sim/ComSim.h"
 
+#include "com_sim/ComSimObserver.h"
+
 std::string ComSim::bomber = "/bomber";
 std::string ComSim::scout = "/scout";
+
+
+
+std::string ComSim::IOTypeToStr(const IOType& ioType) 
+{
+    if(ioType == ComSim::Master) { return std::string("master"); }
+    else if(ioType == ComSim::Slave) { return std::string("slave"); }
+    else { 
+        ROS_ERROR_STREAM("Unknown type " << ioType); 
+        return std::string(); 
+    }
+}
 
 
 ComSim::ComSim(const def::BoardName& boardName,
                const IOType ioType,
                ComSimObserver& comSimObserver) 
-    : m_boardName(boardName)
-    , m_IOType(ioType)
+    : m_ioName( boardName +'/' + ComSim::IOTypeToStr(ioType) )
+    , m_ioType(ioType)
     , m_nh(boardName + '/' + def::g_uavNodeName)
     , m_observer(comSimObserver)
-    , m_input( m_nh.advertise<uavcom::UavMessage>(getInputTopicName(ioType), 10) )
-    , m_output( m_nh.subscribe<uavcom::UavMessage>(getOutputTopicName(ioType), 10,
-                                                   &ComSim::ouputHandle, this) )
     , m_coordinates(m_nh, boardName+"/mavros/local_position/pose", 10)
-{ }
-
-
-void ComSim::publishToInput(const uavcom::UavMessage::ConstPtr& uavMessage) 
 { 
+}
+
+
+void ComSim::publishToInput(const ComSim* from,
+                            const uavcom::UavMessage::ConstPtr& uavMessage) 
+{ 
+    if( !check(from) ) { return; }
+    ROS_INFO_STREAM(from->m_ioName << " -> " << this->m_ioName);
     simulateDelay(uavMessage, [this](const uavcom::UavMessage::ConstPtr& uavMessage) 
     {
         m_input.publish(uavMessage);
@@ -37,7 +52,7 @@ void ComSim::ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage)
 {
     simulateDelay(uavMessage, [this](const uavcom::UavMessage::ConstPtr& uavMessage) 
     {
-        m_observer.publishToInput(m_boardName, uavMessage);
+        m_observer.publishToInput(m_ioName, uavMessage);
     });
 }
 
@@ -56,29 +71,42 @@ void ComSim::simulateDelay(const uavcom::UavMessage::ConstPtr& uavMessage,
 }
 
 
-def::TopicName ComSim::getOutputTopicName(const IOType ioType) 
+double ComSim::evalDistance(const ComSim* from, const ComSim* to) const 
 {
-    if(ioType == ComSim::IOType::Master)
-    {
-       return def::g_cone+def::g_output;
-    }
-    else if(ioType == ComSim::IOType::Slave)
-    {
-        return def::g_output;
-    }
-    else { return std::string(); }
+    auto fromCoord = from->getCoordinates();
+    auto toCoord = to->getCoordinates();     
+
+    double fromX = fromCoord->pose.position.x;
+    double toX = toCoord->pose.position.x;
+    double deltaX = fromX-toX;
+
+    double fromY = fromCoord->pose.position.y;
+    double toY = toCoord->pose.position.y;
+    double deltaY = fromY-toY;
+        
+    return std::sqrt( ( std::pow(deltaX, 2) + std::pow(deltaY, 2) ) );
 }
 
 
-def::TopicName ComSim::getInputTopicName(const IOType ioType) 
+bool ComSim::isSlaveInCone(const ComSim* master, const ComSim* slave) const
 {
-    if(ioType == ComSim::IOType::Master)
-    {
-       return def::g_cone+def::g_input;
-    }
-    else if(ioType == ComSim::IOType::Slave)
-    {
-        return def::g_input;
-    }
-    else { return std::string(); }   
+    auto masterCoord = master->getCoordinates();
+    if(masterCoord == nullptr) { return false; }
+    auto slaveCoord = slave->getCoordinates();
+    if(slaveCoord == nullptr) { return false; }
+
+    double masterHeight = masterCoord->pose.position.z;
+    double slaveHeight = slaveCoord->pose.position.z;
+
+    //slave height should be lesser then master height 
+    if(slaveHeight >= masterHeight) { return false; }    
+
+    double deltaHeight = masterHeight - slaveHeight;   
+
+    //TODO - hardcode! Angle should be dynamicly set
+    double radius = tan(45)*masterHeight;
+    double subRadius = (radius*deltaHeight)/masterHeight;
+    double distance = evalDistance(master, slave); 
+
+    return subRadius >= distance;
 }

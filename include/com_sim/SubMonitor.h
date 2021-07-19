@@ -9,7 +9,7 @@ public:
     SubMonitor(ros::NodeHandle nodeHandle, const std::string &topic, uint32_t queue_size)
         : m_subscriber(nodeHandle.subscribe<MessageType>
                        (topic, queue_size, &SubMonitor::callback, this) )
-        , m_currentMessage(new const MessageType)
+        , m_currentMessage(nullptr)
     { }
     SubMonitor(const SubMonitor &origin) = delete;
     SubMonitor& operator=(const SubMonitor &origin) = delete;
@@ -23,6 +23,7 @@ public:
 protected:
     virtual void callback(const boost::shared_ptr<MessageType const> &message) 
     { 
+        if(m_currentMessage == nullptr) { m_currentMessage.reset(new const MessageType); }
         m_currentMessage = message; ros::this_node::getNamespace();
     }
 

@@ -155,7 +155,8 @@ add_executable(com_sim
                 src/com_sim/ComSimMonitor.cpp
                 src/com_sim/ComSimObserver.cpp
                 src/com_sim/ComSim.cpp
-                src/com_sim/SlaveChecker.cpp
+                src/com_sim/SlaveComSim.cpp
+                src/com_sim/MasterComSim.cpp
                 src/com_sim/main.cpp
               )
 target_link_libraries(com_sim
