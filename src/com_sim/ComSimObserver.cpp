@@ -23,7 +23,7 @@ void ComSimObserver::publishToInput(const ComSim::IOName& fromIoName,
     }
 }
 
-
+//TODO - переписать эту вакханалию
 void ComSimObserver::checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTopics) 
 {
     for(int topicIndex=0; topicIndex < publishedTopics.size(); ++topicIndex)

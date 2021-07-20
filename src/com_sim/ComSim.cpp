@@ -11,10 +11,6 @@ std::string ComSim::IOTypeToStr(const IOType& ioType)
 {
     if(ioType == ComSim::Master) { return std::string("master"); }
     else if(ioType == ComSim::Slave) { return std::string("slave"); }
-    else { 
-        ROS_ERROR_STREAM("Unknown type " << ioType); 
-        return std::string(); 
-    }
 }
 
 
@@ -26,8 +22,7 @@ ComSim::ComSim(const def::BoardName& boardName,
     , m_nh(boardName + '/' + def::g_uavNodeName)
     , m_observer(comSimObserver)
     , m_coordinates(m_nh, boardName+"/mavros/local_position/pose", 10)
-{ 
-}
+{ }
 
 
 void ComSim::publishToInput(const ComSim* from,
@@ -107,6 +102,8 @@ bool ComSim::isSlaveInCone(const ComSim* master, const ComSim* slave) const
     double radius = tan(45)*masterHeight;
     double subRadius = (radius*deltaHeight)/masterHeight;
     double distance = evalDistance(master, slave); 
+
+    ROS_INFO_STREAM(subRadius << "****" << distance);
 
     return subRadius >= distance;
 }
