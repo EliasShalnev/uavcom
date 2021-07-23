@@ -6,7 +6,7 @@ MasterComSim::MasterComSim(const def::BoardName& boardName,
     : ComSim(boardName, ComSim::IOType::Master, comSimObserver)
 {
     m_input = m_nh.advertise<uavcom::UavMessage>(def::g_cone+def::g_input, 10);
-    m_output = m_nh.subscribe<uavcom::UavMessage>(def::g_output, 10,
+    m_output = m_nh.subscribe<uavcom::UavMessage>(def::g_cone+def::g_output, 10,
                                                   &MasterComSim::ouputHandle, this);
 }
 
@@ -17,9 +17,9 @@ void MasterComSim::ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage)
 }
 
 
-bool MasterComSim::check(const ComSim* from) 
+bool MasterComSim::check(const ComSim::Ptr from) 
 {
-    if(from->getIOType() == ComSim::Slave) { return isSlaveInCone(this, from);  }
+    if(from->getIOType() == ComSim::Slave) { return isSlaveInCone(this, from.get());  }
     else if(from->getIOType() == ComSim::Master) { return false; }
 
     return false;

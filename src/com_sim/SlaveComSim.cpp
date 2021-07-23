@@ -13,10 +13,10 @@ SlaveComSim::SlaveComSim(const def::BoardName& boardName,
 }
 
 
-bool SlaveComSim::check(const ComSim* from) 
+bool SlaveComSim::check(const ComSim::Ptr from) 
 {
     if(from->getIOType() == ComSim::Slave) { return false; }
-    else if(from->getIOType() == ComSim::Master) { return isSlaveInCone(from, this); }
+    else if(from->getIOType() == ComSim::Master) { return isSlaveInCone(from.get(), this); }
 
     return false;
 }

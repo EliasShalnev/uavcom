@@ -1,7 +1,5 @@
 #pragma once
 
-#include "common/common.h"
-
 #include "uavcom/StreamTopic.h"
 
 #include "uav_com/UavCom.h"
@@ -9,26 +7,23 @@
 #include "uav_com/InputUavStream.h"
 
 
-namespace def {
 
 class Slave : public UavCom
 {
 public:
-    Slave(ros::NodeHandle nodeHandle);
+    Slave(const def::BoardName& boardName);
     Slave(const Slave&) = delete;
     Slave& operator=(const Slave&) = delete;
     virtual ~Slave() = default;
 
-    void redirectToOutput(const TopicName& topicName) override;
+    void redirectToOutput(const def::TopicName& topicName) override;
 
-    void streamTopicRequest(const TopicName& topicName) override;
-
-protected:
-    // bool containsInOutput(const TopicName& topicName) override; 
-    OutputUavStream* getReachableOutput(const BoardName& destination) override;
+    void streamTopicRequest(const def::TopicName& topicName) override;
 
 protected:
-    ros::NodeHandle m_nodeHandle;
+    OutputUavStream* getReachableOutput(const def::BoardName& destination) override;
+
+protected:
     InputUavStream  m_input;
     OutputUavStream m_output;
 
@@ -43,15 +38,15 @@ protected:
         ~StreamTopicServer() = default;
 
     private:
-        inline bool isDestExist(const TopicName& topicName, 
-                                const BoardName& dest) const;
+        inline bool isDestExist(const def::TopicName& topicName, 
+                                const def::BoardName& dest) const;
         bool onStreamTopicRequest(uavcom::StreamTopic::Request& req,
                                   uavcom::StreamTopic::Response& res);
 
     private:
         Slave* m_enclose;
         ros::ServiceServer m_server; //starting streaming requested topic to "output" topic
-        std::unordered_multimap<TopicName, BoardName> m_destinations;
+        std::unordered_multimap<def::TopicName, def::BoardName> m_destinations;
     } m_streamTopicServer;
 
     /****Client****/
@@ -62,11 +57,9 @@ protected:
         StreamTopicClient& operator=(const StreamTopicClient&) = delete;
         ~StreamTopicClient() = default;
 
-        void streamTopicRequest(const TopicName& topicName);
+        void streamTopicRequest(const def::TopicName& topicName);
 
     private:
         Slave* m_enclose;
     } m_streamTopicClient;
 };
-
-} //namespace def

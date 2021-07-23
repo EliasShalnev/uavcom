@@ -25,11 +25,11 @@ ComSim::ComSim(const def::BoardName& boardName,
 { }
 
 
-void ComSim::publishToInput(const ComSim* from,
+void ComSim::publishToInput(const ComSim::Ptr from,
                             const uavcom::UavMessage::ConstPtr& uavMessage) 
 { 
     if( !check(from) ) { return; }
-    ROS_INFO_STREAM(from->m_ioName << " -> " << this->m_ioName);
+    
     simulateDelay(uavMessage, [this](const uavcom::UavMessage::ConstPtr& uavMessage) 
     {
         m_input.publish(uavMessage);
@@ -96,14 +96,13 @@ bool ComSim::isSlaveInCone(const ComSim* master, const ComSim* slave) const
     //slave height should be lesser then master height 
     if(slaveHeight >= masterHeight) { return false; }    
 
-    double deltaHeight = masterHeight - slaveHeight;   
+    double deltaHeight = masterHeight - slaveHeight;
 
     //TODO - hardcode! Angle should be dynamicly set
     double radius = tan(45)*masterHeight;
     double subRadius = (radius*deltaHeight)/masterHeight;
     double distance = evalDistance(master, slave); 
 
-    ROS_INFO_STREAM(subRadius << "****" << distance);
 
     return subRadius >= distance;
 }

@@ -1,19 +1,30 @@
-#include <ros/ros.h>
+#include <ros/node_handle.h>
+#include <ros/master.h>
 
-#include "common/common.h"
+#include "common/globals.h"
 
 #include "uavcom/Heartbeat.h"
 
-#include "uav_com/UavComMonitor.h"
+#include "common/TopicMonitor.h"
+#include "uav_com/TopicFilter.h"
+
 
 
 int main(int argc, char **argv)
 {
     ros::init(argc, argv, def::g_uavNodeName);
-    ros::NodeHandle nodeHandle;
+    ros::NodeHandle nodeHandle("~");
+
+    def::BoardName boardName = ros::this_node::getNamespace();
+    if(boardName.find(UavCom::MASTER) != std::string::npos) {}
+    else if(boardName.find(UavCom::SLAVE) != std::string::npos ) {}
+    else {
+        ROS_ERROR_STREAM("Unknown board name: " << boardName 
+                         << ". It should be " << UavCom::MASTER << " or " << UavCom::SLAVE);
+        return 0;
+    }    
     
-    const std::string heartBeatTopicName = ros::this_node::getName() + def::g_broadcast + 
-                                           ros::this_node::getNamespace() + def::g_heartbeat;
+    const std::string heartBeatTopicName = def::g_broadcast + ros::this_node::getNamespace() + def::g_heartbeat;
     ros::Publisher heartbeatPub = nodeHandle.advertise<uavcom::Heartbeat>(heartBeatTopicName, 10);
 
     ros::Timer heartbeatTimer( nodeHandle.createTimer(ros::Duration(0.2), 
@@ -25,7 +36,14 @@ int main(int argc, char **argv)
         heartbeatPub.publish(heartbeat);
     }) );
 
-    auto topicMonitor = def::UavComMonitor::getInstance();
+    TopicFilter topicFilter(boardName);
+    auto checkPubTopics = std::bind(&TopicFilter::checkPublishedTopics, &topicFilter, std::placeholders::_1);
+    auto checkSubTopics = std::bind(&TopicFilter::checkSubscribedTopics, &topicFilter, std::placeholders::_1);
+
+    TopicMonitor topicMonitor;
+    topicMonitor.onPublishedTopics(checkPubTopics);
+    topicMonitor.onSubscribedTopics(checkSubTopics);
+
 
     ros::spin();
     

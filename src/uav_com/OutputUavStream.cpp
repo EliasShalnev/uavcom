@@ -1,26 +1,23 @@
 #include "uav_com/OutputUavStream.h"
 
+#include "common/TopicHelper.h"
+
 #include "uavcom/Heartbeat.h"
-
-#include "uav_com/UavComMonitor.h"
-
-
-namespace def {
 
 
 OutputUavStream::OutputUavStream(ros::NodeHandle nodeHandle, const std::string& streamName)
     : m_nodeHandle(nodeHandle)
-    , m_output( nodeHandle.advertise<uavcom::UavMessage>(ros::this_node::getName() + '/' + streamName, 10) )
-    , m_subCheckTimer( nodeHandle.createTimer(ros::Duration(5), 
+    , m_output( nodeHandle.advertise<uavcom::UavMessage>(streamName, 10) )
+    , m_subCheckTimer( nodeHandle.createTimer(m_checkTimerFreq, 
                                               &OutputUavStream::checkSubscribers,
                                               this) )
 { 
-    const std::string heartBeatTopicName = ros::this_node::getName() + g_broadcast + 
-                                           ros::this_node::getNamespace() + g_heartbeat;
+    const std::string heartBeatTopicName = ros::this_node::getName() + '/' + def::g_broadcast + 
+                                           ros::this_node::getNamespace() + def::g_heartbeat;
     redirectToOutput(heartBeatTopicName);
 }
 
-void OutputUavStream::redirectToOutput(const std::string& topicName) 
+void OutputUavStream::redirectToOutput(const def::TopicName& topicName) 
 {
     //check if published topic have already subscribed by this node
     if( m_toOutputTopics.end() != m_toOutputTopics.find(topicName) ) { return; }
@@ -32,12 +29,11 @@ void OutputUavStream::redirectToOutput(const std::string& topicName)
     {
         //preparing output topic msg
         uavcom::UavMessage::Ptr uavMessage(new uavcom::UavMessage);
-        uavMessage->topicName = getRemoteTopicName(topicName);
+        uavMessage->topicName = TopicHelper(topicName).getRemoteTopicName();
         uavMessage->MD5Sum = msg->getMD5Sum();
         uavMessage->dataType = msg->getDataType();
         getByteArray( *msg, uavMessage->byteArray );
 
-        //TODO: check if it reachable
         m_output.publish(uavMessage);
     };
 
@@ -46,7 +42,7 @@ void OutputUavStream::redirectToOutput(const std::string& topicName)
 }
 
 
-bool OutputUavStream::contains(const TopicName& topicName) const
+bool OutputUavStream::contains(const def::TopicName& topicName) const
 {
     return m_toOutputTopics.end() !=  m_toOutputTopics.find(topicName);
 }
@@ -63,7 +59,7 @@ void OutputUavStream::checkSubscribers(const ros::TimerEvent& event)
     for( auto it = m_toOutputTopics.begin(); it != m_toOutputTopics.end(); )
     {
         auto topicName = it->first;
-        if( isUavcomTopic(topicName) )
+        if( TopicHelper(topicName).isUavcomTopic() )
         { 
             if(it->second.getNumPublishers() == 0)
             {
@@ -74,6 +70,3 @@ void OutputUavStream::checkSubscribers(const ros::TimerEvent& event)
         ++it;
     }
 }
-
-
-} //namespace def

@@ -1,4 +1,0 @@
-<launch>
-    <node name="com_sim" pkg="uavcom" type="com_sim" output="screen" ns="scou"/>
-
-</launch>

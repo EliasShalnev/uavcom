@@ -1,30 +1,26 @@
 #include "uav_com/Master.h"
 
 
-
-namespace def {
-
-
-Master::Master(ros::NodeHandle& nodeHandle) 
-    : Slave(nodeHandle)
-    , m_coneInput(nodeHandle, g_cone+g_input)
-    , m_coneOutput(nodeHandle, g_cone+g_output)
+Master::Master(const def::BoardName& boardName) 
+    : Slave(boardName)
+    , m_coneInput(m_nh, def::g_cone+def::g_input)
+    , m_coneOutput(m_nh, def::g_cone+def::g_output)
 { }
 
 
-void Master::redirectToOutput(const TopicName& topicName) 
+void Master::redirectToOutput(const def::TopicName& topicName) 
 {
     Slave::redirectToOutput(topicName);
 }
 
 
-void Master::streamTopicRequest(const TopicName& topicName) 
+void Master::streamTopicRequest(const def::TopicName& topicName) 
 {
     Slave::streamTopicRequest(topicName);
 }
 
 
-OutputUavStream* Master::getReachableOutput(const BoardName& destination) 
+OutputUavStream* Master::getReachableOutput(const def::BoardName& destination) 
 {
     OutputUavStream* outputUavStream = Slave::getReachableOutput(destination);
     if( nullptr != outputUavStream ) { return outputUavStream; } 
@@ -34,4 +30,3 @@ OutputUavStream* Master::getReachableOutput(const BoardName& destination)
 }
 
 
-} //namespace def

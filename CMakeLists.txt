@@ -136,9 +136,11 @@ include_directories(
 )
 
 add_executable(uav_com
-                # src/uav_com/QtROSNode.cpp
-                # src/uav_com/MasterAPI.cpp
-                src/uav_com/UavComMonitor.cpp
+                src/common/TopicMonitor.cpp
+                src/common/NSParser.cpp
+                src/common/TopicHelper.cpp
+                src/uav_com/TopicFilter.cpp
+                src/uav_com/UavCom.cpp
                 src/uav_com/Slave.cpp
                 src/uav_com/Master.cpp
                 src/uav_com/OutputUavStream.cpp
@@ -152,7 +154,9 @@ target_link_libraries(uav_com
 add_dependencies(uav_com uavcom_generate_messages_cpp)
 
 add_executable(com_sim
-                src/com_sim/ComSimMonitor.cpp
+                src/common/TopicMonitor.cpp
+                src/common/NSParser.cpp
+                src/common/TopicHelper.cpp
                 src/com_sim/ComSimObserver.cpp
                 src/com_sim/ComSim.cpp
                 src/com_sim/SlaveComSim.cpp

@@ -22,6 +22,7 @@ public:
     void checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTopics);
 
 private:
-    std::unordered_map<ComSim::IOName, ComSim*> m_store; //TODO - заменить на shared_ptr
+    std::size_t IO_TOPIC_SIZE = 3;
+    std::unordered_map< ComSim::IOName, ComSim::Ptr > m_store;
 };
 

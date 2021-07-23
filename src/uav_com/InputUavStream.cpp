@@ -2,30 +2,28 @@
 
 #include "uavcom/StreamTopic.h"
 
+#include "common/TopicHelper.h"
+
 #include "uav_com/ReasonCodes.h"
-
-
-namespace def
-{
 
 
 InputUavStream::InputUavStream(ros::NodeHandle nodeHandle, const std::string& streamName)
     : m_nodeHandle(nodeHandle)
-    , m_input( nodeHandle.subscribe<uavcom::UavMessage>( ros::this_node::getName()+'/'+streamName, 10, 
-                                                         &InputUavStream::inputHandle, this) )
+    , m_input( nodeHandle.subscribe<uavcom::UavMessage>(streamName, 10, 
+                                                        &InputUavStream::inputHandle, this) )
 { }
 
 
-bool InputUavStream::contains(const TopicName& topicName) const
+bool InputUavStream::contains(const def::TopicName& topicName) const
 {
     return m_fromInputTopics.end() !=  m_fromInputTopics.find(topicName);
 }
 
 
-bool InputUavStream::isReachable(const std::string& boardName) const
+bool InputUavStream::isReachable(const def::BoardName& boardName) const
 {
-    std::string heartbeatTopic = ros::this_node::getNamespace() + boardName + g_heartbeat;
-
+    def::TopicName heartbeatTopic = ros::this_node::getNamespace() + boardName + def::g_heartbeat;
+    
     if( m_fromInputTopics.find(heartbeatTopic) != m_fromInputTopics.end() ) { return true; }
     return false;
 }
@@ -33,14 +31,15 @@ bool InputUavStream::isReachable(const std::string& boardName) const
 
 void InputUavStream::inputHandle(const uavcom::UavMessage::ConstPtr& uavMsg) 
 {
-    std::string topicName = uavMsg->topicName;
+    def::TopicName topicName = uavMsg->topicName;
+    TopicHelper topicHelper(topicName);
 
-    const std::string ns = getFirstSegment(topicName);
+    const std::string ns = *topicHelper.begin();
     //filter not for this node msgs
     if( ns != ros::this_node::getNamespace() ) 
     { 
-        if(ns != g_broadcast) { return; }
-        auto newTopicName = deleteFirstSegment(topicName);
+        if(ns != '/'+def::g_broadcast) { return; } // if it isn't broadcast msg 
+        auto newTopicName = topicHelper.deleteFirstSegment();
         topicName = ros::this_node::getNamespace() + newTopicName;
     } 
     RosMsgParser::ShapeShifter msg;
@@ -76,6 +75,3 @@ void InputUavStream::inputHandle(const uavcom::UavMessage::ConstPtr& uavMsg)
         pubTimer.start();
     }  
 }
-
-
-} //namespace def

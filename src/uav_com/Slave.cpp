@@ -2,23 +2,26 @@
 
 #include "uavcom/StreamTopic.h"
 
+#include "common/TopicHelper.h"
+
 #include "uav_com/ReasonCodes.h"
 
-namespace def {
 
-Slave::Slave(ros::NodeHandle nodeHandle) 
-    : m_nodeHandle(nodeHandle)
-    , m_input(nodeHandle, g_input)
-    , m_output(nodeHandle, g_output)
+Slave::Slave(const def::BoardName& boardName) 
+    : UavCom(boardName)
+    , m_input(m_nh, def::g_input)
+    , m_output(m_nh, def::g_output)
     , m_streamTopicServer(this)
     , m_streamTopicClient(this)
 { }
 
 
-void Slave::redirectToOutput(const TopicName& topicName) 
+void Slave::redirectToOutput(const def::TopicName& topicName) 
 {
-    auto remoteTopic = getRemoteTopicName(topicName);
-    auto destination = getFirstSegment(remoteTopic);
+    TopicHelper topicHelper(topicName);
+
+    auto remoteTopic = topicHelper.getRemoteTopicName();
+    auto destination = *TopicHelper(remoteTopic).begin();
 
     OutputUavStream* outputUavStream = getReachableOutput(destination);
 
@@ -27,19 +30,13 @@ void Slave::redirectToOutput(const TopicName& topicName)
 }
 
 
-void Slave::streamTopicRequest(const TopicName& topicName) 
+void Slave::streamTopicRequest(const def::TopicName& topicName) 
 {
     m_streamTopicClient.streamTopicRequest(topicName);
 }
 
 
-// bool Slave::containsInOutput(const TopicName& topicName) 
-// {
-    // return m_output.contains(topicName);
-// }
-
-
-OutputUavStream* Slave::getReachableOutput(const BoardName& destination)
+OutputUavStream* Slave::getReachableOutput(const def::BoardName& destination)
 {
     if( m_input.isReachable(destination) ) { return &m_output; } //FIXME: potential error. Bad interface. Probably return weak_ptr or smth
     return nullptr;
@@ -48,17 +45,17 @@ OutputUavStream* Slave::getReachableOutput(const BoardName& destination)
 
 Slave::StreamTopicServer::StreamTopicServer(Slave* enclose) 
     : m_enclose(enclose)
-    , m_server( enclose->m_nodeHandle.advertiseService(enclose->STREAM_TOPIC_SRV_NAME,
-                                                       &Slave::StreamTopicServer::onStreamTopicRequest,
-                                                       this) )    
+    , m_server( enclose->m_nh.advertiseService(enclose->STREAM_TOPIC_SRV_NAME,
+                                               &Slave::StreamTopicServer::onStreamTopicRequest,
+                                               this) )    
 {}
 
 
 bool Slave::StreamTopicServer::onStreamTopicRequest(uavcom::StreamTopic::Request& req,
                                                     uavcom::StreamTopic::Response& res) 
 {
-    const TopicName topicName = req.topicName;
-    const BoardName destination = req.destination;
+    const def::TopicName topicName = req.topicName;
+    const def::BoardName destination = req.destination;
     
     OutputUavStream* outpuUavStream = m_enclose->getReachableOutput(destination);
 
@@ -79,15 +76,15 @@ bool Slave::StreamTopicServer::onStreamTopicRequest(uavcom::StreamTopic::Request
                 {
                     std::string destination = destIt->second;
                     uavcom::UavMessage::Ptr uavMessage(new uavcom::UavMessage);
-                    uavMessage->topicName = destination + '/' + g_uavNodeName + topicName;
+                    uavMessage->topicName = destination + '/' + def::g_uavNodeName + topicName;
                     uavMessage->MD5Sum = msg->getMD5Sum();
                     uavMessage->dataType = msg->getDataType();
-                    getByteArray( *msg, uavMessage->byteArray );
+                    outpuUavStream->getByteArray( *msg, uavMessage->byteArray );
 
                     outpuUavStream->publish(uavMessage);
                 }
             };
-            ros::Subscriber subscriber = m_enclose->m_nodeHandle.subscribe(topicName, 10, callback);
+            ros::Subscriber subscriber = m_enclose->m_nh.subscribe(topicName, 10, callback);
             outpuUavStream->emplace(topicName, subscriber);
         }
     }
@@ -105,8 +102,8 @@ bool Slave::StreamTopicServer::onStreamTopicRequest(uavcom::StreamTopic::Request
 }
 
 
-inline bool Slave::StreamTopicServer::isDestExist(const TopicName& topicName, 
-                                                  const BoardName& dest) const
+inline bool Slave::StreamTopicServer::isDestExist(const def::TopicName& topicName, 
+                                                  const def::BoardName& dest) const
 {
     auto [beginDest, endDest] = m_destinations.equal_range(topicName);
     for(auto destIt = beginDest; destIt != endDest; ++destIt)
@@ -122,23 +119,24 @@ Slave::StreamTopicClient::StreamTopicClient(Slave* enclose)
 { }
 
 
-void Slave::StreamTopicClient::streamTopicRequest(const TopicName& topicName) 
+void Slave::StreamTopicClient::streamTopicRequest(const def::TopicName& topicName) 
 {
     //TODO create auto delete when unsubscribe
     
     //check if subscribed topic have already published by this node
     if( m_enclose->m_input.contains(topicName) ) { return; }
 
-    TopicName remoteTopicName = getRemoteTopicName(topicName);
-    BoardName destination = ros::this_node::getNamespace();
+    def::TopicName remoteTopicName = TopicHelper(topicName).getRemoteTopicName();
+    def::BoardName destination = ros::this_node::getNamespace();
 
     uavcom::StreamTopic streamTopic;
     streamTopic.request.topicName = remoteTopicName;
     streamTopic.request.destination = destination;
 
-    const std::string serviceName = getFirstSegment(remoteTopicName) + '/' + m_enclose->STREAM_TOPIC_SRV_NAME;
+    const std::string serviceName = *TopicHelper(remoteTopicName).begin() + "/uav_com/"
+                                    + m_enclose->STREAM_TOPIC_SRV_NAME;
 
-    ros::ServiceClient streamTopicCLient = m_enclose->m_nodeHandle.serviceClient<uavcom::StreamTopic>(serviceName);
+    ros::ServiceClient streamTopicCLient = m_enclose->m_nh.serviceClient<uavcom::StreamTopic>(serviceName);
 
     ROS_INFO_STREAM("Calling " << serviceName << " service.");
     if( streamTopicCLient.call(streamTopic) )
@@ -163,4 +161,3 @@ void Slave::StreamTopicClient::streamTopicRequest(const TopicName& topicName)
 }
 
 
-} //namespace def

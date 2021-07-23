@@ -5,10 +5,10 @@
 #include <ros/publisher.h>
 #include <ros/subscriber.h>
 
-#include "common/common.h"
-
 #include <geometry_msgs/PoseStamped.h>
 #include "uavcom/UavMessage.h"
+
+#include "common/globals.h"
 
 #include "com_sim/SubMonitor.h"
 
@@ -17,6 +17,7 @@ class ComSimObserver;
 class ComSim
 {
 public:
+    using Ptr = std::shared_ptr<ComSim>;
     using IOName = std::string;
     static std::string bomber;
     static std::string scout;
@@ -31,7 +32,7 @@ public:
     ComSim& operator=(const ComSim&) = delete;
     virtual ~ComSim() = default;
 
-    void publishToInput(const ComSim* from, const uavcom::UavMessage::ConstPtr& uavMessage);
+    void publishToInput(const ComSim::Ptr from, const uavcom::UavMessage::ConstPtr& uavMessage);
 
     geometry_msgs::PoseStamped::ConstPtr getCoordinates() const;
     
@@ -40,7 +41,7 @@ public:
 protected:
     void ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage);
 
-    virtual bool check(const ComSim* from) = 0;
+    virtual bool check(const ComSim::Ptr from) = 0;
 
     void setDelay(const ros::Duration& delay) { m_delay=delay; }
 

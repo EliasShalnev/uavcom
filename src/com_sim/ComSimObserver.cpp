@@ -1,12 +1,14 @@
 #include "com_sim/ComSimObserver.h"
 
+#include "common/TopicHelper.h"
+
 #include "com_sim/ComSim.h"
 #include "com_sim/SlaveComSim.h"
 #include "com_sim/MasterComSim.h"
 
 ComSimObserver::~ComSimObserver() 
 {
-    for(auto uavComSimIt : m_store) { delete uavComSimIt.second; }
+    // for(auto uavComSimIt : m_store) { delete uavComSimIt.second; }
 }
 
 
@@ -14,6 +16,7 @@ void ComSimObserver::publishToInput(const ComSim::IOName& fromIoName,
                                     const uavcom::UavMessage::ConstPtr& uavMessage) 
 {
     auto fromComSim = m_store.find(fromIoName);
+
     
     for(auto toComSim : m_store)
     {
@@ -23,49 +26,39 @@ void ComSimObserver::publishToInput(const ComSim::IOName& fromIoName,
     }
 }
 
-//TODO - переписать эту вакханалию
+
 void ComSimObserver::checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTopics) 
 {
     for(int topicIndex=0; topicIndex < publishedTopics.size(); ++topicIndex)
     {
         auto topicName = def::TopicName( publishedTopics[topicIndex][0] );
+        TopicHelper topicHelper(topicName);
         ComSim::IOType ioType;
 
+        if(topicHelper.size() != IO_TOPIC_SIZE) { continue; }
+
         //проверка топика на /cone_output
-        auto outputPos = topicName.rfind('/'+def::g_cone+def::g_output);
-        if( std::string::npos != outputPos ) { ioType = ComSim::IOType::Master; }
-        else 
+        auto segmentIt = --topicHelper.end();
+        if(*segmentIt == '/'+def::g_cone+def::g_output ) { ioType = ComSim::IOType::Master; }
+        else
         {
             //проверка топика на /output
-            outputPos = topicName.rfind('/'+def::g_output);
-            if(std::string::npos != outputPos) { ioType = ComSim::IOType::Slave; }
+            if(*segmentIt == '/'+def::g_output) { ioType = ComSim::IOType::Slave; }
             else { continue; }
         }
 
         //проверка топика на /uav_com
-        auto uav_comPos = topicName.rfind(def::g_uavNodeName, outputPos);
-        if( std::string::npos == uav_comPos ) { continue; }
+        segmentIt = --segmentIt;
+        if(*segmentIt != '/'+def::g_uavNodeName) { continue; }
 
-        //проверка на тип БпЛА. Если в префиксе нет /scout или /bomber - отбрасываем топик
-        def::BoardName boardName = def::getFirstSegment(topicName);
-        if(ioType == ComSim::IOType::Master)
+        //Если в префиксе нет /scout или /bomber - отбрасываем топик
+        def::BoardName boardName = *topicHelper.begin();
+        if(boardName.find(ComSim::scout) == std::string::npos &&
+           boardName.find(ComSim::bomber) == std::string::npos)
         {
-            //если топик был определен как Master, то у него должен быть префикc /scout
-            if(boardName.find(ComSim::scout) == std::string::npos) { 
-                ROS_ERROR_STREAM("Master should be with " << ComSim::scout << " prefix." );
-                continue; 
-            }
+            ROS_ERROR_STREAM("Invalid boardname " << boardName);
+            continue;
         }
-        else if(ioType == ComSim::IOType::Slave)
-        {
-            //если топик был определен как Slave, то у него должен быть префикс /bomber
-            if(boardName.find(ComSim::bomber) == std::string::npos &&
-               boardName.find(ComSim::scout) == std::string::npos) { 
-                ROS_ERROR_STREAM("Slave should be with " << ComSim::bomber << " prefix." );
-                continue; 
-            }
-        }
-        else { ROS_ERROR_STREAM("Unknown type " << ioType; ); }
 
         std::string interface = boardName +'/' + ComSim::IOTypeToStr(ioType);
         if( m_store.end() != m_store.find(interface) ) { continue; }

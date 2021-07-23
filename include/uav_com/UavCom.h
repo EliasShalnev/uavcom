@@ -1,25 +1,32 @@
 #pragma once
 
-#include "common/common.h"
+#include <ros/node_handle.h>
+
+#include "common/globals.h"
 
 #include "uav_com/OutputUavStream.h"
 
-namespace def {
 
 class UavCom
 {
 public:
-    UavCom() = default;
+    const static std::string MASTER;
+    const static std::string SLAVE;
+
+public:
+    UavCom(const def::BoardName& boardName);
     UavCom(const UavCom&) = delete;
     UavCom& operator=(const UavCom&) = delete;
     virtual ~UavCom() = default;
 
-    virtual void redirectToOutput(const TopicName& topicName) = 0;
-    virtual void streamTopicRequest(const TopicName& topicName) = 0;
+    virtual void redirectToOutput(const def::TopicName& topicName) = 0;
+    virtual void streamTopicRequest(const def::TopicName& topicName) = 0;
 
 protected:
-    // virtual bool containsInOutput(const TopicName& topicName) = 0;
-    virtual OutputUavStream* getReachableOutput(const BoardName& destination) = 0;
+    ros::NodeHandle m_nh;
+
+protected:
+    const def::BoardName m_boardName; 
+    virtual OutputUavStream* getReachableOutput(const def::BoardName& destination) = 0;
 };
 
-} //namespace def
