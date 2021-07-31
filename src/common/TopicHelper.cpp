@@ -12,13 +12,13 @@ TopicHelper::TopicHelper(const TopicHelper& rhs)
 { }
 
 
-bool TopicHelper::isUavcomTopic()
+bool TopicHelper::isUavcomTopic() const
 {
     return m_nsParser[NS_INDEX]+m_nsParser[NODE_NAME_INDEX] == ros::this_node::getName();
 }
 
 
-def::TopicName TopicHelper::getRemoteTopicName() 
+def::TopicName TopicHelper::getRemoteTopicName() const
 {
     if( isUavcomTopic() )
     {
@@ -28,7 +28,7 @@ def::TopicName TopicHelper::getRemoteTopicName()
 }
 
 
-def::TopicName TopicHelper::deleteFirstSegment() 
+def::TopicName TopicHelper::deleteFirstSegment() const
 {
     def::TopicName result;
     for(auto segment = m_nsParser.begin()+1; segment < m_nsParser.end(); ++segment)

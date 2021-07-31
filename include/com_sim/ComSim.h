@@ -41,7 +41,7 @@ public:
 protected:
     void ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage);
 
-    virtual bool check(const ComSim::Ptr from) = 0;
+    virtual bool check(const ComSim::Ptr from) const = 0;
 
     void setDelay(const ros::Duration& delay) { m_delay=delay; }
 

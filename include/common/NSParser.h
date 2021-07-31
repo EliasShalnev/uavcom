@@ -19,10 +19,15 @@ public:
 
     Segment& operator[](std::size_t n) { return m_segments[n]; }
 
+    const Segment& operator[](std::size_t n) const { return m_segments[n]; }
+
     auto begin() { return m_segments.begin(); }
     auto end() { return m_segments.end(); }
 
-    NameSpace getSubNameSpace(std::size_t from, std::size_t to);
+    auto begin() const { return m_segments.begin(); }
+    auto end() const { return m_segments.end(); }
+
+    NameSpace getSubNameSpace(std::size_t from, std::size_t to) const;
 
 private:
     const NameSpace m_nameSpace;

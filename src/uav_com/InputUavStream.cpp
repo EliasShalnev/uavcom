@@ -22,7 +22,7 @@ bool InputUavStream::contains(const def::TopicName& topicName) const
 
 bool InputUavStream::isReachable(const def::BoardName& boardName) const
 {
-    def::TopicName heartbeatTopic = ros::this_node::getNamespace() + boardName + def::g_heartbeat;
+    def::TopicName heartbeatTopic = ros::this_node::getNamespace() + boardName + '/' + def::g_heartbeat;
     
     if( m_fromInputTopics.find(heartbeatTopic) != m_fromInputTopics.end() ) { return true; }
     return false;

@@ -1,6 +1,7 @@
 #pragma once
 
-#include <ros/ros.h>
+#include <ros/node_handle.h>
+#include <ros/subscriber.h>
 
 
 template <class MessageType>
@@ -31,7 +32,7 @@ public:
 protected:
     virtual void callback(const boost::shared_ptr<MessageType const> &message) 
     { 
-        m_currentMessage = message; ros::this_node::getNamespace();
+        m_currentMessage = message; 
     }
 
 private:

@@ -17,7 +17,7 @@ void MasterComSim::ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage)
 }
 
 
-bool MasterComSim::check(const ComSim::Ptr from) 
+bool MasterComSim::check(const ComSim::Ptr from) const 
 {
     if(from->getIOType() == ComSim::Slave) { return isSlaveInCone(this, from.get());  }
     else if(from->getIOType() == ComSim::Master) { return false; }

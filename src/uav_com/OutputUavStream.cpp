@@ -13,7 +13,7 @@ OutputUavStream::OutputUavStream(ros::NodeHandle nodeHandle, const std::string& 
                                               this) )
 { 
     const std::string heartBeatTopicName = ros::this_node::getName() + '/' + def::g_broadcast + 
-                                           ros::this_node::getNamespace() + def::g_heartbeat;
+                                           ros::this_node::getNamespace() + '/' + def::g_heartbeat;
     redirectToOutput(heartBeatTopicName);
 }
 

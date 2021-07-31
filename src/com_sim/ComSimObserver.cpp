@@ -6,11 +6,6 @@
 #include "com_sim/SlaveComSim.h"
 #include "com_sim/MasterComSim.h"
 
-ComSimObserver::~ComSimObserver() 
-{
-    // for(auto uavComSimIt : m_store) { delete uavComSimIt.second; }
-}
-
 
 void ComSimObserver::publishToInput(const ComSim::IOName& fromIoName, 
                                     const uavcom::UavMessage::ConstPtr& uavMessage) 
@@ -31,14 +26,14 @@ void ComSimObserver::checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTo
 {
     for(int topicIndex=0; topicIndex < publishedTopics.size(); ++topicIndex)
     {
-        auto topicName = def::TopicName( publishedTopics[topicIndex][0] );
-        TopicHelper topicHelper(topicName);
+        const def::TopicName topicName = def::TopicName( publishedTopics[topicIndex][0] );
+        const TopicHelper topicHelper(topicName);
         ComSim::IOType ioType;
 
         if(topicHelper.size() != IO_TOPIC_SIZE) { continue; }
 
-        //проверка топика на /cone_output
         auto segmentIt = --topicHelper.end();
+        //проверка топика на /cone_output
         if(*segmentIt == '/'+def::g_cone+def::g_output ) { ioType = ComSim::IOType::Master; }
         else
         {
@@ -52,7 +47,7 @@ void ComSimObserver::checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTo
         if(*segmentIt != '/'+def::g_uavNodeName) { continue; }
 
         //Если в префиксе нет /scout или /bomber - отбрасываем топик
-        def::BoardName boardName = *topicHelper.begin();
+        const def::BoardName boardName = *topicHelper.begin();
         if(boardName.find(ComSim::scout) == std::string::npos &&
            boardName.find(ComSim::bomber) == std::string::npos)
         {
@@ -60,7 +55,7 @@ void ComSimObserver::checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTo
             continue;
         }
 
-        std::string interface = boardName +'/' + ComSim::IOTypeToStr(ioType);
+        const std::string interface = boardName+'/'+ComSim::IOTypeToStr(ioType);
         if( m_store.end() != m_store.find(interface) ) { continue; }
 
         ComSim* newComSim;

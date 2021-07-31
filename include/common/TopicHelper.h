@@ -14,18 +14,23 @@ public:
     ~TopicHelper() = default;
 
 
-    inline std::size_t size() { return m_nsParser.size(); }
+    inline std::size_t size() const { return m_nsParser.size(); }
 
     NSParser::Segment& operator[](std::size_t n) { return m_nsParser[n]; }
+
+    const NSParser::Segment& operator[](std::size_t n) const { return m_nsParser[n]; }
 
     auto begin() { return m_nsParser.begin(); }
     auto end() { return m_nsParser.end(); }
 
-    bool isUavcomTopic();
+    auto begin() const { return m_nsParser.begin(); }
+    auto end() const { return m_nsParser.end(); }
 
-    def::TopicName getRemoteTopicName();
+    bool isUavcomTopic() const;
 
-    def::TopicName deleteFirstSegment();
+    def::TopicName getRemoteTopicName() const ;
+
+    def::TopicName deleteFirstSegment() const;
 
 private:
     NSParser m_nsParser;

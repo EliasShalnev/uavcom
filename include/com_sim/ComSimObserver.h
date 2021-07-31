@@ -14,7 +14,7 @@ public:
     ComSimObserver() = default;
     ComSimObserver(const ComSimObserver& orig) = delete;
     ComSimObserver& operator=(const ComSimObserver& orig) = delete;
-    ~ComSimObserver();
+    ~ComSimObserver() = default;
 
     void publishToInput(const ComSim::IOName& fromIoName, 
                         const uavcom::UavMessage::ConstPtr& uavMessage);
@@ -23,6 +23,6 @@ public:
 
 private:
     std::size_t IO_TOPIC_SIZE = 3;
-    std::unordered_map< ComSim::IOName, ComSim::Ptr > m_store;
+    std::unordered_map<ComSim::IOName, ComSim::Ptr> m_store;
 };
 

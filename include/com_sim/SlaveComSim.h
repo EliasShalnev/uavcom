@@ -15,6 +15,6 @@ private:
     void ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage);
 
 protected:
-    bool check(const ComSim::Ptr from) override;
+    bool check(const ComSim::Ptr from) const override;
 };
 

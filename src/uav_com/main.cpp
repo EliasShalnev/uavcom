@@ -24,7 +24,7 @@ int main(int argc, char **argv)
         return 0;
     }    
     
-    const std::string heartBeatTopicName = def::g_broadcast + ros::this_node::getNamespace() + def::g_heartbeat;
+    const std::string heartBeatTopicName = def::g_broadcast + ros::this_node::getNamespace() + '/' + def::g_heartbeat;
     ros::Publisher heartbeatPub = nodeHandle.advertise<uavcom::Heartbeat>(heartBeatTopicName, 10);
 
     ros::Timer heartbeatTimer( nodeHandle.createTimer(ros::Duration(0.2), 

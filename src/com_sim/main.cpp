@@ -6,6 +6,7 @@
 
 const std::string &nodename = "com_sim";
 
+
 int main(int argc, char** argv)
 {
     ros::init(argc, argv, nodename);
@@ -15,7 +16,6 @@ int main(int argc, char** argv)
 
     TopicMonitor topicMonitor;
     topicMonitor.onPublishedTopics(checkPubTopics);
-
 
     ros::spin();
 

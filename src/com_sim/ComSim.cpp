@@ -7,7 +7,7 @@ std::string ComSim::scout = "/scout";
 
 
 
-std::string ComSim::IOTypeToStr(const IOType& ioType) 
+std::string ComSim::IOTypeToStr(const IOType& ioType)
 {
     if(ioType == ComSim::Master) { return std::string("master"); }
     else if(ioType == ComSim::Slave) { return std::string("slave"); }

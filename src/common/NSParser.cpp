@@ -26,7 +26,7 @@ NSParser::NSParser(const NSParser& rhs)
 { }
 
 
-NSParser::NameSpace NSParser::getSubNameSpace(std::size_t from, std::size_t to) 
+NSParser::NameSpace NSParser::getSubNameSpace(std::size_t from, std::size_t to) const
 {
     if( from >= m_segments.size() ) { return nullptr; }
     if( to >= m_segments.size() ) { return nullptr; }
