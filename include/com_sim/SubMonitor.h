@@ -11,7 +11,7 @@ public:
     SubMonitor(ros::NodeHandle nodeHandle, const std::string &topic, uint32_t queue_size)
         : m_subscriber(nodeHandle.subscribe<MessageType>
                        (topic, queue_size, &SubMonitor::callback, this) )
-        , m_currentMessage(new const MessageType)
+        , m_currentMessage(nullptr)
     { }
     SubMonitor(const SubMonitor &origin) = delete;
     SubMonitor& operator=(const SubMonitor &origin) = delete;
@@ -25,8 +25,7 @@ public:
      */
     boost::shared_ptr<MessageType const> getMessage() const 
     { 
-        if(m_subscriber.getNumPublishers() == 0) { return nullptr; }
-        return m_currentMessage; 
+        return m_currentMessage;
     }
 
 protected:

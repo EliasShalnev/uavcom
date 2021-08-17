@@ -32,7 +32,7 @@ public:
     ComSim& operator=(const ComSim&) = delete;
     virtual ~ComSim() = default;
 
-    void publishToInput(const ComSim::Ptr from, const uavcom::UavMessage::ConstPtr& uavMessage);
+    void publishToInput(const ComSim::Ptr& from, const uavcom::UavMessage::ConstPtr& uavMessage);
 
     geometry_msgs::PoseStamped::ConstPtr getCoordinates() const;
     
@@ -43,12 +43,15 @@ protected:
 
     virtual bool check(const ComSim::Ptr from) const = 0;
 
-    void setDelay(const ros::Duration& delay) { m_delay=delay; }
+    double getDelay(const ComSim::Ptr& from);
 
     void simulateDelay(const uavcom::UavMessage::ConstPtr& uavMessage,
+                       const double& delay, 
                        const std::function<void(const uavcom::UavMessage::ConstPtr&)>& func);
 
-    double evalDistance(const ComSim* from, const ComSim* to) const;
+    double evalDistance2D(const ComSim* from, const ComSim* to) const;
+
+    double evalDistance(const ComSim* from, const ComSim* to) const ;
 
     bool isSlaveInCone(const ComSim* master, const ComSim* slave) const;
 
@@ -63,8 +66,6 @@ private:
     const IOType m_ioType;
 
     ComSimObserver& m_observer;
-
-    ros::Duration m_delay {0};
 
     SubMonitor<geometry_msgs::PoseStamped> m_coordinates;
 };

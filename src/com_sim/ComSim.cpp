@@ -25,12 +25,13 @@ ComSim::ComSim(const def::BoardName& boardName,
 { }
 
 
-void ComSim::publishToInput(const ComSim::Ptr from,
+void ComSim::publishToInput(const ComSim::Ptr& from,
                             const uavcom::UavMessage::ConstPtr& uavMessage) 
 { 
     if( !check(from) ) { return; }
     
-    simulateDelay(uavMessage, [this](const uavcom::UavMessage::ConstPtr& uavMessage) 
+    simulateDelay(uavMessage, getDelay(from), 
+                  [this](const uavcom::UavMessage::ConstPtr& uavMessage) 
     {
         m_input.publish(uavMessage);
     });
@@ -45,13 +46,29 @@ geometry_msgs::PoseStamped::ConstPtr ComSim::getCoordinates() const
 
 void ComSim::ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage) 
 {
-    simulateDelay(uavMessage, [this](const uavcom::UavMessage::ConstPtr& uavMessage) 
-    {
-        m_observer.publishToInput(m_ioName, uavMessage);
-    });
+    // simulateDelay(uavMessage, [this](const uavcom::UavMessage::ConstPtr& uavMessage) 
+    // {
+    m_observer.publishToInput(m_ioName, uavMessage);
+    // });
 }
 
+
+double ComSim::getDelay(const ComSim::Ptr& from) 
+{
+    double delay = 0.002; //1мс - задержка по-умолчанию
+
+    auto distance = evalDistance(from.get(), this);
+
+    auto time = 1/std::pow(distance, 3) + delay;
+
+    // ROS_INFO_STREAM("time " << time << " olol " << 1/std::pow(distance, 3));
+
+    return delay;
+}
+
+
 void ComSim::simulateDelay(const uavcom::UavMessage::ConstPtr& uavMessage,
+                           const double& delay, 
                            const std::function<void(const uavcom::UavMessage::ConstPtr&)>& func)
 {
     ros::Timer* timer = new ros::Timer;
@@ -62,7 +79,24 @@ void ComSim::simulateDelay(const uavcom::UavMessage::ConstPtr& uavMessage,
         delete timer;
     };
 
-    *timer = m_nh.createTimer(m_delay, callback, true);
+    *timer = m_nh.createTimer(ros::Duration(delay), callback, true);
+}
+
+
+double ComSim::evalDistance2D(const ComSim* from, const ComSim* to) const 
+{
+    auto fromCoord = from->getCoordinates();
+    auto toCoord = to->getCoordinates();     
+
+    double fromX = fromCoord->pose.position.x;
+    double toX = toCoord->pose.position.x;
+    double deltaX = fromX-toX;
+
+    double fromY = fromCoord->pose.position.y;
+    double toY = toCoord->pose.position.y;
+    double deltaY = fromY-toY;
+        
+    return std::sqrt( std::pow(deltaX, 2) + std::pow(deltaY, 2) );
 }
 
 
@@ -78,8 +112,12 @@ double ComSim::evalDistance(const ComSim* from, const ComSim* to) const
     double fromY = fromCoord->pose.position.y;
     double toY = toCoord->pose.position.y;
     double deltaY = fromY-toY;
-        
-    return std::sqrt( ( std::pow(deltaX, 2) + std::pow(deltaY, 2) ) );
+
+    double fromZ = fromCoord->pose.position.z;
+    double toZ = toCoord->pose.position.z;
+    double deltaZ = fromZ-toZ;
+
+    return std::sqrt( std::pow(deltaX, 2) + std::pow(deltaY, 2)  + std::pow(deltaZ, 2) );
 }
 
 
@@ -101,8 +139,9 @@ bool ComSim::isSlaveInCone(const ComSim* master, const ComSim* slave) const
     //TODO - hardcode! Angle should be dynamicly set
     double radius = tan(45)*masterHeight;
     double subRadius = (radius*deltaHeight)/masterHeight;
-    double distance = evalDistance(master, slave); 
+    double distance = evalDistance2D(master, slave); 
 
+    ROS_INFO_STREAM("subRadius " << subRadius << " radius " << radius);
 
     return subRadius >= distance;
 }

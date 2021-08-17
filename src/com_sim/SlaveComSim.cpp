@@ -13,16 +13,17 @@ SlaveComSim::SlaveComSim(const def::BoardName& boardName,
 }
 
 
+//TODO - убрать костыль
+void SlaveComSim::ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage) 
+{
+    ComSim::ouputHandle(uavMessage);
+}
+
+
 bool SlaveComSim::check(const ComSim::Ptr from) const 
 {
     if(from->getIOType() == ComSim::Slave) { return false; }
     else if(from->getIOType() == ComSim::Master) { return isSlaveInCone(from.get(), this); }
 
     return false;
-}
-
-//TODO - убрать костыль
-void SlaveComSim::ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage) 
-{
-    ComSim::ouputHandle(uavMessage);
 }
