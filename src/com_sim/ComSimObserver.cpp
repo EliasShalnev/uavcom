@@ -2,7 +2,7 @@
 
 #include <ros/master.h>
 
-#include "common/TopicHelper.h"
+#include "common/NSParser.h"
 
 #include "com_sim/ComSim.h"
 #include "com_sim/SlaveComSim.h"

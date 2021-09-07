@@ -8,7 +8,7 @@
 class TopicFilter
 {
 public:
-    TopicFilter(const def::BoardName& boardName);
+    TopicFilter(UavCom* uavCom);
     ~TopicFilter() = default;
 
     void checkPublishedTopics(const XmlRpc::XmlRpcValue& pubTopics);
@@ -24,5 +24,4 @@ private:
 private:
     const std::size_t MIN_TOPIC_SIZE = 4;
     std::unique_ptr<UavCom> m_uavCom = nullptr;
-
 };

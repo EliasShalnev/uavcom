@@ -4,7 +4,7 @@
 
 #include <std_msgs/String.h>
 
-const std::string &nodeName = "uavcom_test";
+const std::string &nodeName = "scoutToBombers";
 
 void callback1(const std_msgs::String::ConstPtr& msg);
 
@@ -16,10 +16,10 @@ int main(int argc, char **argv)
 
     ros::NodeHandle nodeHandle;
 
-    ros::Subscriber sub1 = nodeHandle.subscribe("/bomber1/uav_com/scout1/topic1", 10, 
+    ros::Subscriber sub1 = nodeHandle.subscribe("/bomber1/uav_com/scout0/topic1", 10, 
                                                 callback1);
 
-    ros::Subscriber sub2 = nodeHandle.subscribe("/bomber2/uav_com/scout1/topic1", 10,
+    ros::Subscriber sub2 = nodeHandle.subscribe("/bomber2/uav_com/scout0/topic1", 10,
                                                 callback2);
 
     ros::spin();
@@ -30,11 +30,11 @@ int main(int argc, char **argv)
 
 void callback1(const std_msgs::String::ConstPtr& msg) 
 {
-    std::cout << "callback 1 " << *msg << std::endl;
+    ROS_INFO_STREAM("callback 1 " << *msg);
 }
 
 
 void callback2(const std_msgs::String::ConstPtr& msg) 
 {
-    std::cout << "callback 2 " << *msg << std::endl;
+    ROS_INFO_STREAM("callback 2 " << *msg);
 }

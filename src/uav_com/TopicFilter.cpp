@@ -6,17 +6,9 @@
 #include "uav_com/Master.h"
 
 
-TopicFilter::TopicFilter(const def::BoardName& boardName) 
-{
-    if( boardName.find(UavCom::MASTER) != std::string::npos )
-    {
-        m_uavCom.reset(new Master(boardName));
-    }
-    else if(boardName.find(UavCom::SLAVE) != std::string::npos)
-    {
-        m_uavCom.reset(new Slave(boardName));
-    }
-}
+TopicFilter::TopicFilter(UavCom* uavCom) 
+    : m_uavCom(uavCom)
+{ }
 
 
 void TopicFilter::checkPublishedTopics(const XmlRpc::XmlRpcValue& pubTopics) 

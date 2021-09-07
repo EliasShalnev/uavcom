@@ -7,7 +7,8 @@
 
 #include "common/TopicMonitor.h"
 #include "uav_com/TopicFilter.h"
-
+#include "uav_com/Slave.h"
+#include "uav_com/Master.h"
 
 
 int main(int argc, char **argv)
@@ -22,7 +23,7 @@ int main(int argc, char **argv)
         ROS_ERROR_STREAM("Unknown board name: " << boardName 
                          << ". It should be " << UavCom::MASTER << " or " << UavCom::SLAVE);
         return -1;
-    }    
+    }
     
     const std::string heartBeatTopicName = def::g_broadcast + ros::this_node::getNamespace() + '/' + def::g_heartbeat;
     ros::Publisher heartbeatPub = nodeHandle.advertise<uavcom::Heartbeat>(heartBeatTopicName, 10);
@@ -36,7 +37,11 @@ int main(int argc, char **argv)
         heartbeatPub.publish(heartbeat);
     }) );
 
-    TopicFilter topicFilter(boardName);
+    UavCom* uavCom = nullptr;
+    if( boardName.find(UavCom::MASTER) != std::string::npos ) { uavCom = new Master(boardName); }
+    else if(boardName.find(UavCom::SLAVE) != std::string::npos) { uavCom = new Slave(boardName); }
+
+    TopicFilter topicFilter(uavCom);
     auto checkPubTopics = std::bind(&TopicFilter::checkPublishedTopics, &topicFilter, std::placeholders::_1);
     auto checkSubTopics = std::bind(&TopicFilter::checkSubscribedTopics, &topicFilter, std::placeholders::_1);
 

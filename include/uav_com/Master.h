@@ -11,12 +11,9 @@ public:
     Master& operator=(const Master&) = delete;
     virtual ~Master() = default;
 
-    void redirectToOutput(const def::TopicName& topicName) override;
-    
-    void streamTopicRequest(const def::TopicName& topicName) override;
-
 protected:
     OutputUavStream* getReachableOutput(const def::BoardName& destination) override;
+    bool isTopicStreamed(const def::TopicName& topicName) override;
 
 protected:
     InputUavStream  m_coneInput;

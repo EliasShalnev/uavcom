@@ -115,7 +115,7 @@ generate_messages(
 catkin_package(
  INCLUDE_DIRS include
 #  LIBRARIES uav_connection
- CATKIN_DEPENDS 
+CATKIN_DEPENDS 
     roscpp 
     ros_msg_parser
     message_runtime
@@ -152,9 +152,7 @@ target_link_libraries(uav_com
 add_dependencies(uav_com uavcom_generate_messages_cpp)
 
 add_executable(com_sim
-                src/common/TopicMonitor.cpp
                 src/common/NSParser.cpp
-                src/common/TopicHelper.cpp
                 src/com_sim/ComSimObserver.cpp
                 src/com_sim/Model.cpp
                 src/com_sim/ComSim.cpp
@@ -167,10 +165,17 @@ target_link_libraries(com_sim
 )
 add_dependencies(com_sim uavcom_generate_messages_cpp)
 
-add_executable(uavcom_test
-                src/uavcom_test/main.cpp
+add_executable(scoutToBombersSub
+                src/uavcom_test/ScoutToBombersSub.cpp
               )
-target_link_libraries(uavcom_test
+target_link_libraries(scoutToBombersSub
+  ${catkin_LIBRARIES}
+)
+
+add_executable(bombersToScoutSub
+                src/uavcom_test/BombersToScoutSub.cpp
+              )
+target_link_libraries(bombersToScoutSub
   ${catkin_LIBRARIES}
 )
 

@@ -8,18 +8,6 @@ Master::Master(const def::BoardName& boardName)
 { }
 
 
-void Master::redirectToOutput(const def::TopicName& topicName) 
-{
-    Slave::redirectToOutput(topicName);
-}
-
-
-void Master::streamTopicRequest(const def::TopicName& topicName) 
-{
-    Slave::streamTopicRequest(topicName);
-}
-
-
 OutputUavStream* Master::getReachableOutput(const def::BoardName& destination) 
 {
     OutputUavStream* outputUavStream = Slave::getReachableOutput(destination);
@@ -30,3 +18,8 @@ OutputUavStream* Master::getReachableOutput(const def::BoardName& destination)
 }
 
 
+bool Master::isTopicStreamed(const def::TopicName& topicName) 
+{
+    if( Slave::isTopicStreamed(topicName) ) { return true; }
+    return m_coneInput.contains(topicName);
+}
