@@ -16,12 +16,12 @@ int main(int argc, char **argv)
     ros::NodeHandle nodeHandle("~");
 
     def::BoardName boardName = ros::this_node::getNamespace();
-    if(boardName.find(UavCom::MASTER) != std::string::npos) {}
-    else if(boardName.find(UavCom::SLAVE) != std::string::npos ) {}
-    else {
+    if( boardName.find(UavCom::MASTER) != std::string::npos && 
+        boardName.find(UavCom::SLAVE) != std::string::npos ) 
+    {
         ROS_ERROR_STREAM("Unknown board name: " << boardName 
                          << ". It should be " << UavCom::MASTER << " or " << UavCom::SLAVE);
-        return 0;
+        return -1;
     }    
     
     const std::string heartBeatTopicName = def::g_broadcast + ros::this_node::getNamespace() + '/' + def::g_heartbeat;
@@ -43,7 +43,6 @@ int main(int argc, char **argv)
     TopicMonitor topicMonitor;
     topicMonitor.onPublishedTopics(checkPubTopics);
     topicMonitor.onSubscribedTopics(checkSubTopics);
-
 
     ros::spin();
     

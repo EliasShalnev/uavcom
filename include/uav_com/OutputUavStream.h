@@ -1,6 +1,5 @@
 #pragma once
 
-
 #include <ros_msg_parser/ros_parser.hpp>
 
 #include "uavcom/UavMessage.h"

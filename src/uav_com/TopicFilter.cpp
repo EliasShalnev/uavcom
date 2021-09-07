@@ -16,9 +16,6 @@ TopicFilter::TopicFilter(const def::BoardName& boardName)
     {
         m_uavCom.reset(new Slave(boardName));
     }
-    else { ROS_ERROR_STREAM("Unknown board name: " << boardName 
-                            << ". It should be " << UavCom::MASTER << " or " << UavCom::SLAVE); }
-
 }
 
 

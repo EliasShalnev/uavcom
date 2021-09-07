@@ -119,8 +119,6 @@ catkin_package(
     roscpp 
     ros_msg_parser
     message_runtime
-    
-#  DEPENDS system_lib
 )
 
 ###########
@@ -158,6 +156,7 @@ add_executable(com_sim
                 src/common/NSParser.cpp
                 src/common/TopicHelper.cpp
                 src/com_sim/ComSimObserver.cpp
+                src/com_sim/Model.cpp
                 src/com_sim/ComSim.cpp
                 src/com_sim/SlaveComSim.cpp
                 src/com_sim/MasterComSim.cpp

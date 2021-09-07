@@ -11,7 +11,6 @@ constexpr ReasonCode OK = 0x00;
 constexpr ReasonCode IsStreaming = OK+1;
 constexpr ReasonCode IsUnreachable = IsStreaming+1;
 
-//maybe move to .cpp file
 inline std::string codeExplanation(const ReasonCode code) 
 {
     if(code == OK) { return std::string("Request for streaming was accepted."); }

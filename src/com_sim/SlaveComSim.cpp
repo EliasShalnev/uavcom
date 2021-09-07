@@ -1,19 +1,17 @@
 #include "com_sim/SlaveComSim.h"
 
 
-SlaveComSim::SlaveComSim(const def::BoardName& boardName,
+SlaveComSim::SlaveComSim(Model::ModelName modelName,
+                         const def::BoardName& boardName,
                          ComSimObserver& comSimObserver) 
-    : ComSim(boardName, ComSim::IOType::Slave, comSimObserver)
-
+    : ComSim(modelName, boardName, comSimObserver)
 { 
-    m_input = m_nh.advertise<uavcom::UavMessage>(def::g_input, 10);
-
-    m_output = m_nh.subscribe<uavcom::UavMessage>(def::g_output, 10,
-                                                  &SlaveComSim::ouputHandle, this);
+    m_input = ComSim::m_nh.advertise<uavcom::UavMessage>(def::g_input, 10);
+    m_output = ComSim::m_nh.subscribe<uavcom::UavMessage>(def::g_output, 10,
+                                                          &SlaveComSim::ouputHandle, this);
 }
 
 
-//TODO - убрать костыль
 void SlaveComSim::ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage) 
 {
     ComSim::ouputHandle(uavMessage);

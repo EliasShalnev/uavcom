@@ -1,5 +1,7 @@
 #include "com_sim/ComSimObserver.h"
 
+#include <ros/master.h>
+
 #include "common/TopicHelper.h"
 
 #include "com_sim/ComSim.h"
@@ -7,64 +9,118 @@
 #include "com_sim/MasterComSim.h"
 
 
+ComSimObserver::ComSimObserver()
+    : m_modelStatesSub( m_nh.subscribe<gazebo_msgs::ModelStates>
+                        ("/gazebo/model_states", 10, &ComSimObserver::checkRegisteredUavModels, this) )
+{ }
+
+
 void ComSimObserver::publishToInput(const ComSim::IOName& fromIoName, 
                                     const uavcom::UavMessage::ConstPtr& uavMessage) 
 {
     auto fromComSim = m_store.find(fromIoName);
 
-    
     for(auto toComSim : m_store)
     {
         if(fromIoName == toComSim.first) { continue; }
 
-        toComSim.second->publishToInput( fromComSim->second, uavMessage);
+        toComSim.second->publishToInput(fromComSim->second, uavMessage);
     }
 }
 
 
-void ComSimObserver::checkPublishedTopics(const XmlRpc::XmlRpcValue &publishedTopics) 
+void ComSimObserver::checkRegisteredUavModels(const gazebo_msgs::ModelStates::ConstPtr& modelStates) 
 {
-    for(int topicIndex=0; topicIndex < publishedTopics.size(); ++topicIndex)
+    auto boardNames = checkRegisteredUavNodes();
+
+    for(auto boardName : boardNames)
     {
-        const def::TopicName topicName = def::TopicName( publishedTopics[topicIndex][0] );
-        const TopicHelper topicHelper(topicName);
         ComSim::IOType ioType;
-
-        if(topicHelper.size() != IO_TOPIC_SIZE) { continue; }
-
-        auto segmentIt = --topicHelper.end();
-        //проверка топика на /cone_output
-        if(*segmentIt == '/'+def::g_cone+def::g_output ) { ioType = ComSim::IOType::Master; }
-        else
+        std::string id;
+        //Извлекаем id и тип БпЛА
+        if(boardName.find(ComSim::bomber) != std::string::npos) 
         {
-            //проверка топика на /output
-            if(*segmentIt == '/'+def::g_output) { ioType = ComSim::IOType::Slave; }
-            else { continue; }
+            id = boardName.substr( strlen(ComSim::bomber) );
+            ioType = ComSim::IOType::Slave; 
         }
-
-        //проверка топика на /uav_com
-        segmentIt = --segmentIt;
-        if(*segmentIt != '/'+def::g_uavNodeName) { continue; }
-
-        //Если в префиксе нет /scout или /bomber - отбрасываем топик
-        const def::BoardName boardName = *topicHelper.begin();
-        if(boardName.find(ComSim::scout) == std::string::npos &&
-           boardName.find(ComSim::bomber) == std::string::npos)
+        else if(boardName.find(ComSim::scout) != std::string::npos)
         {
-            ROS_ERROR_STREAM("Invalid boardname " << boardName);
+            id = boardName.substr( strlen(ComSim::scout) );
+            ioType = ComSim::IOType::Master; 
+        }
+        
+        for(auto model : modelStates->name)
+        {
+            std::string modelId;
+            //извлекаем id из модели ral_x6 или orlan
+            if(model.find(ComSim::ral_x6) != std::string::npos) 
+            {
+                modelId = model.substr( strlen(ComSim::ral_x6) );
+            }
+            else if(model.find(ComSim::orlan) != std::string::npos)
+            {
+                modelId = model.substr( strlen(ComSim::orlan) );
+            }
+            else { continue; }
+            
+            //если id совпадают, то создаем наследника ComSim исходя из найденого типа БпЛА
+            if(id != modelId) { continue; }
+            
+            if(ioType == ComSim::IOType::Master)
+            {
+                /* slave interface creation */
+                const std::string slaveInterface = boardName+'/'+ComSim::IOTypeToStr(ComSim::IOType::Slave);
+                if( m_store.end() == m_store.find(slaveInterface) ) 
+                { 
+                    ROS_INFO_STREAM("Found " << slaveInterface << " with model \"" << model << "\".");
+                    ComSim* slaveComSim = new SlaveComSim(model, boardName, *this);
+                    m_store.emplace(slaveInterface, slaveComSim);
+                }
+                /* master interface creation */
+                const std::string masterInterface = boardName+'/'+ComSim::IOTypeToStr(ComSim::IOType::Master);
+                if(m_store.end() == m_store.find(masterInterface))
+                {
+                    ROS_INFO_STREAM("Found " << masterInterface << " with model \"" << model << "\".");
+                    ComSim* masterComSim = new MasterComSim(model, boardName, *this);
+                    m_store.emplace(masterInterface, masterComSim);
+                }
+            }
+            else if(ioType == ComSim::IOType::Slave)
+            {
+                const std::string interface = boardName+'/'+ComSim::IOTypeToStr(ComSim::IOType::Slave);
+                if( m_store.end() != m_store.find(interface) ) { continue; }
+
+                ROS_INFO_STREAM("Found " << interface << " with model \"" << model << "\".");
+                ComSim* slaveComSim = new SlaveComSim(model, boardName, *this);
+                m_store.emplace(interface, slaveComSim);  
+            }
+        }
+    }
+}
+
+
+std::vector<std::string> ComSimObserver::checkRegisteredUavNodes() 
+{
+    std::vector<std::string> nodes;
+    ros::master::getNodes(nodes);
+
+    std::vector<std::string> uavs;
+
+    for(auto node : nodes)
+    {
+        NSParser nsParser(node);
+        if(nsParser.size() != 2) { continue; }
+
+        if( *(nsParser.end()-1) != std::string("/mavros") ) { continue; }
+        
+        const std::string boardName = *nsParser.begin();
+
+        if( boardName.find(ComSim::bomber) != std::string::npos &&
+            boardName.find(ComSim::scout) != std::string::npos ) 
+        {
             continue;
         }
-
-        const std::string interface = boardName+'/'+ComSim::IOTypeToStr(ioType);
-        if( m_store.end() != m_store.find(interface) ) { continue; }
-
-        ComSim* newComSim;
-        if(ioType == ComSim::Slave) { newComSim = new SlaveComSim(boardName, *this); }
-        else if(ioType == ComSim::Master) { newComSim = new MasterComSim(boardName, *this); }
-
-        ROS_INFO_STREAM("find " << interface);
-        m_store.emplace( interface, newComSim );
+        else { uavs.emplace_back(boardName); }
     }
+    return uavs;
 }
-
-

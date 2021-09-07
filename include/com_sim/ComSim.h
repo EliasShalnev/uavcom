@@ -5,28 +5,30 @@
 #include <ros/publisher.h>
 #include <ros/subscriber.h>
 
-#include <geometry_msgs/PoseStamped.h>
 #include "uavcom/UavMessage.h"
 
 #include "common/globals.h"
 
+#include "com_sim/Model.h"
 #include "com_sim/SubMonitor.h"
 
 class ComSimObserver;
 
-class ComSim
+class ComSim : public Model
 {
 public:
     using Ptr = std::shared_ptr<ComSim>;
     using IOName = std::string;
-    static std::string bomber;
-    static std::string scout;
+    static constexpr char bomber[] = "/bomber";
+    static constexpr char scout[] = "/scout";
+    static constexpr char ral_x6[] = "ral_x6";
+    static constexpr char orlan[] = "orlan";
     enum IOType {Master=0, Slave};
     static std::string IOTypeToStr(const IOType& ioType);
 
 public:
-    ComSim(const def::BoardName& boardName,
-           const IOType ioType,
+    ComSim(Model::ModelName modelName,
+           const def::BoardName& boardName,
            ComSimObserver& comSimObserver);
     ComSim(const ComSim&) = delete;
     ComSim& operator=(const ComSim&) = delete;
@@ -34,14 +36,14 @@ public:
 
     void publishToInput(const ComSim::Ptr& from, const uavcom::UavMessage::ConstPtr& uavMessage);
 
-    geometry_msgs::PoseStamped::ConstPtr getCoordinates() const;
-    
-    IOType getIOType() const { return m_ioType; }
+    virtual IOType getIOType() const = 0; 
+
+    virtual IOName getIOName() const = 0;
 
 protected:
-    void ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage);
-
     virtual bool check(const ComSim::Ptr from) const = 0;
+    
+    void ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage);
 
     double getDelay(const ComSim::Ptr& from);
 
@@ -56,16 +58,12 @@ protected:
     bool isSlaveInCone(const ComSim* master, const ComSim* slave) const;
 
 protected:
-    const IOName m_ioName;
+    const def::BoardName m_boardName;
     ros::NodeHandle m_nh;
 
     ros::Publisher  m_input;
     ros::Subscriber m_output;
 
 private:
-    const IOType m_ioType;
-
     ComSimObserver& m_observer;
-
-    SubMonitor<geometry_msgs::PoseStamped> m_coordinates;
 };

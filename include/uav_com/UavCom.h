@@ -23,10 +23,10 @@ public:
     virtual void streamTopicRequest(const def::TopicName& topicName) = 0;
 
 protected:
-    ros::NodeHandle m_nh;
+    virtual OutputUavStream* getReachableOutput(const def::BoardName& destination) = 0;
 
 protected:
     const def::BoardName m_boardName; 
-    virtual OutputUavStream* getReachableOutput(const def::BoardName& destination) = 0;
+    ros::NodeHandle m_nh;
 };
 
