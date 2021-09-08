@@ -133,7 +133,7 @@ bool ComSim::isSlaveInCone(const ComSim* master, const ComSim* slave) const
         ROS_ERROR_STREAM( "Slave \"" << slave->getIOName() << 
                           "\" is not in master's cone \"" << master->getIOName() << "\"." );
         ROS_ERROR_STREAM( "Distance \"" << distance << "\" should be lesser than \"" 
-                                        << subRadius << "\". radius: " << radius );
+                                        << subRadius << "\"." );
     }
 
     return subRadius >= distance;
