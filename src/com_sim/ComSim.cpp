@@ -123,7 +123,8 @@ bool ComSim::isSlaveInCone(const ComSim* master, const ComSim* slave) const
     double deltaHeight = masterHeight - slaveHeight;
 
     //TODO - hardcode! Angle should be dynamicly set
-    double radius = tan(45)*masterHeight;
+    constexpr double pi = 3.14159265;
+    double radius = tan(45*pi/180 )*masterHeight;
     double subRadius = (radius*deltaHeight)/masterHeight;
     double distance = evalDistance2D(master, slave);
 
@@ -132,7 +133,7 @@ bool ComSim::isSlaveInCone(const ComSim* master, const ComSim* slave) const
         ROS_ERROR_STREAM( "Slave \"" << slave->getIOName() << 
                           "\" is not in master's cone \"" << master->getIOName() << "\"." );
         ROS_ERROR_STREAM( "Distance \"" << distance << "\" should be lesser than \"" 
-                                        << subRadius << "\"." );
+                                        << subRadius << "\". radius: " << radius );
     }
 
     return subRadius >= distance;
