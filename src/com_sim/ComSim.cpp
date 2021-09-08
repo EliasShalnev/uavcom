@@ -41,13 +41,14 @@ void ComSim::ouputHandle(const uavcom::UavMessage::ConstPtr& uavMessage)
 
 double ComSim::getDelay(const ComSim::Ptr& from) 
 {
-    double delay = 0.002; //1мс - задержка по-умолчанию
+    const double delay = 0.002; //2мс - задержка по-умолчанию
+    constexpr int thresholdHeight = 1200; //пороговая высота, при которой вычислимая задержка будет равна пороговой задержке
+    constexpr double thresholdDelay = 0.05; //вычислимая задержка, которая будет при достижении пороговой высоты
 
-    auto distance = evalDistance(from.get(), this);
+    const auto distance = evalDistance(from.get(), this);
+    auto time = thresholdDelay*std::pow(distance, 3)/std::pow(thresholdHeight, 3) + delay;
 
-    auto time = 1/std::pow(distance, 3) + delay;
-
-    // ROS_INFO_STREAM("time " << time << " olol " << 1/std::pow(distance, 3));
+    // ROS_INFO_STREAM("time " << time);
 
     return delay;
 }
