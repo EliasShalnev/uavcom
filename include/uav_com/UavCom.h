@@ -26,7 +26,7 @@ public:
     virtual void streamTopicRequest(const def::TopicName& topicName);
 
 protected:
-    virtual OutputUavStream* getReachableOutput(const def::BoardName& destination) = 0;
+    virtual OutputUavStream::Ptr getReachableOutput(const def::BoardName& destination) = 0;
     virtual bool isTopicStreamed(const def::TopicName& topicName) = 0;
 
 protected:

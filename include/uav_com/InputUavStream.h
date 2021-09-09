@@ -9,7 +9,8 @@
 
 class InputUavStream
 {
-using ExpiringPublisher = std::pair<ros::Timer, ros::Publisher>;
+public:
+    using Ptr = std::shared_ptr<InputUavStream>;
 
 public:
     InputUavStream(ros::NodeHandle nodeHandle, const std::string& streamName);
@@ -50,5 +51,6 @@ private:
 
     ros::Subscriber m_input; //"input" topic subscriber
 
+    using ExpiringPublisher = std::pair<ros::Timer, ros::Publisher>;
     std::unordered_map<def::TopicName, ExpiringPublisher> m_fromInputTopics; //redirected from "input" topics 
 };

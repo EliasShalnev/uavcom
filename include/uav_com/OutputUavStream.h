@@ -10,6 +10,9 @@
 class OutputUavStream
 {
 public:
+    using Ptr = std::shared_ptr<OutputUavStream>;
+
+public:
     OutputUavStream(ros::NodeHandle nodeHandle, const std::string& streamName);
     OutputUavStream(const OutputUavStream&) = delete;
     OutputUavStream& operator=(const OutputUavStream&) = delete;

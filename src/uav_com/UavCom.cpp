@@ -23,7 +23,7 @@ void UavCom::redirectToOutput(const def::TopicName& topicName)
     auto remoteTopic = topicHelper.getRemoteTopicName();
     auto destination = *TopicHelper(remoteTopic).begin();
 
-    OutputUavStream* outputUavStream = getReachableOutput(destination);
+    auto outputUavStream = getReachableOutput(destination);
 
     if( nullptr != outputUavStream ) { outputUavStream->redirectToOutput(topicName); }
     else { ROS_WARN_STREAM("Destination " << destination << " is unreachable."); }
@@ -42,7 +42,7 @@ UavCom::StreamTopicServer::StreamTopicServer(UavCom* enclose)
     : m_enclose(enclose)
     , m_server( enclose->m_nh.advertiseService(enclose->STREAM_TOPIC_SRV_NAME,
                                                &UavCom::StreamTopicServer::onStreamTopicRequest,
-                                               this) )    
+                                               this) )
 {}
 
 
@@ -52,7 +52,7 @@ bool UavCom::StreamTopicServer::onStreamTopicRequest(uavcom::StreamTopic::Reques
     const def::TopicName topicName = req.topicName;
     const def::BoardName destination = req.destination;
     
-    OutputUavStream* outpuUavStream = m_enclose->getReachableOutput(destination);
+    auto outpuUavStream = m_enclose->getReachableOutput(destination);
 
     //check if publishers exists
     if(nullptr == outpuUavStream) { res.status = StreamTopic::IsUnreachable; }

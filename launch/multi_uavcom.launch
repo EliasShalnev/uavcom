@@ -8,6 +8,9 @@
     <group ns="bomber2">
         <include file="$(find uavcom)/launch/uavcom.launch"/>
     </group>
+    <group ns="bomber3">
+        <include file="$(find uavcom)/launch/uavcom.launch"/>
+    </group>
     
     <node name="com_sim" pkg="uavcom" type="com_sim" output="screen"/> 
 </launch>

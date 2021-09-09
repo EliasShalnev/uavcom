@@ -14,10 +14,10 @@ public:
     virtual ~Slave() = default;
 
 protected:
-    OutputUavStream* getReachableOutput(const def::BoardName& destination) override;
+    OutputUavStream::Ptr getReachableOutput(const def::BoardName& destination) override;
     bool isTopicStreamed(const def::TopicName& topicName) override;
 
 protected:
-    InputUavStream  m_input;
-    OutputUavStream m_output;
+    InputUavStream::Ptr  m_slaveInput;
+    OutputUavStream::Ptr m_slaveOutput;
 };

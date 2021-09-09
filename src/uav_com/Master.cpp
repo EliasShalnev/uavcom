@@ -3,16 +3,16 @@
 
 Master::Master(const def::BoardName& boardName) 
     : Slave(boardName)
-    , m_coneInput(m_nh, def::g_cone+def::g_input)
-    , m_coneOutput(m_nh, def::g_cone+def::g_output)
+    , m_masterInput( new InputUavStream(m_nh, def::g_masterIOPrefix+def::g_input) )
+    , m_masterOutput( new OutputUavStream(m_nh, def::g_masterIOPrefix+def::g_output) )
 { }
 
 
-OutputUavStream* Master::getReachableOutput(const def::BoardName& destination) 
+OutputUavStream::Ptr Master::getReachableOutput(const def::BoardName& destination) 
 {
-    OutputUavStream* outputUavStream = Slave::getReachableOutput(destination);
+    auto outputUavStream = Slave::getReachableOutput(destination);
     if( nullptr != outputUavStream ) { return outputUavStream; } 
-    else if ( m_coneInput.isReachable(destination) ) { return &m_coneOutput; } //FIXME: potential error. Bad interface. Probably return weak_ptr or smth
+    else if ( m_masterInput->isReachable(destination) ) { return m_masterOutput; }
 
     return nullptr;
 }
@@ -21,5 +21,5 @@ OutputUavStream* Master::getReachableOutput(const def::BoardName& destination)
 bool Master::isTopicStreamed(const def::TopicName& topicName) 
 {
     if( Slave::isTopicStreamed(topicName) ) { return true; }
-    return m_coneInput.contains(topicName);
+    return m_masterInput->contains(topicName);
 }

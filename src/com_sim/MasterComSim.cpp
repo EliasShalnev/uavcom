@@ -6,8 +6,8 @@ MasterComSim::MasterComSim(Model::ModelName modelName,
                            ComSimObserver& comSimObserver)
     : ComSim(modelName, boardName, comSimObserver)
 {
-    m_input = ComSim::m_nh.advertise<uavcom::UavMessage>(def::g_cone+def::g_input, 10);
-    m_output = ComSim::m_nh.subscribe<uavcom::UavMessage>(def::g_cone+def::g_output, 10,
+    m_input = ComSim::m_nh.advertise<uavcom::UavMessage>(def::g_masterIOPrefix+def::g_input, 10);
+    m_output = ComSim::m_nh.subscribe<uavcom::UavMessage>(def::g_masterIOPrefix+def::g_output, 10,
                                                           &MasterComSim::ouputHandle, this);
 }
 

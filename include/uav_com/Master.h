@@ -12,11 +12,11 @@ public:
     virtual ~Master() = default;
 
 protected:
-    OutputUavStream* getReachableOutput(const def::BoardName& destination) override;
+    OutputUavStream::Ptr getReachableOutput(const def::BoardName& destination) override;
     bool isTopicStreamed(const def::TopicName& topicName) override;
 
 protected:
-    InputUavStream  m_coneInput;
-    OutputUavStream m_coneOutput;
+    InputUavStream::Ptr  m_masterInput;
+    OutputUavStream::Ptr m_masterOutput;
 };
 

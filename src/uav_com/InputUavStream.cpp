@@ -38,7 +38,7 @@ void InputUavStream::inputHandle(const uavcom::UavMessage::ConstPtr& uavMsg)
     //filter not for this node msgs
     if( ns != ros::this_node::getNamespace() ) 
     { 
-        if(ns != '/'+def::g_broadcast) { return; } // if it isn't broadcast msg 
+        if(ns != '/'+def::g_broadcast) { return; } //if it isn't broadcast msg 
         auto newTopicName = topicHelper.deleteFirstSegment();
         topicName = ros::this_node::getNamespace() + newTopicName;
     } 
