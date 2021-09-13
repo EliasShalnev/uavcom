@@ -22,6 +22,7 @@ public:
     static constexpr char bomber[] = "/bomber";
     static constexpr char scout[] = "/scout";
     static constexpr char ral_x6[] = "ral_x6";
+    static constexpr char orlanCam[] = "orlan_cam";
     static constexpr char orlan[] = "orlan";
     enum IOType {Master=0, Slave};
     static std::string IOTypeToStr(const IOType& ioType);
