@@ -57,9 +57,9 @@ void ComSimObserver::checkRegisteredUavModels(const gazebo_msgs::ModelStates::Co
             {
                 modelId = model.substr( strlen(ComSim::ral_x6) );
             }
-            else if(model.find(ComSim::orlanCam) != std::string::npos)
+            else if(model.find(ComSim::orlan_cam) != std::string::npos)
             {
-                modelId = model.substr( strlen(ComSim::orlanCam) );
+                modelId = model.substr( strlen(ComSim::orlan_cam) );
             }
             else if(model.find(ComSim::orlan) != std::string::npos)
             {
