@@ -23,10 +23,12 @@ public:
     virtual ~UavCom() = default;
 
     void redirectToOutput(const def::TopicName& topicName);
+
     virtual void streamTopicRequest(const def::TopicName& topicName);
 
 protected:
     virtual OutputUavStream::Ptr getReachableOutput(const def::BoardName& destination) = 0;
+    
     virtual bool isTopicStreamed(const def::TopicName& topicName) = 0;
 
 protected:

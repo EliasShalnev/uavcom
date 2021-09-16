@@ -128,7 +128,7 @@ void UavCom::StreamTopicClient::streamTopicRequest(const def::TopicName& topicNa
     streamTopic.request.topicName = remoteTopicName;
     streamTopic.request.destination = destination;
 
-    const std::string serviceName = *TopicHelper(remoteTopicName).begin() + "/uav_com/"
+    const std::string serviceName = *(TopicHelper(remoteTopicName).begin()) + "/uav_com/"
                                     + m_enclose->STREAM_TOPIC_SRV_NAME;
 
     ros::ServiceClient streamTopicCLient = m_enclose->m_nh.serviceClient<uavcom::StreamTopic>(serviceName);

@@ -41,7 +41,7 @@ void InputUavStream::inputHandle(const uavcom::UavMessage::ConstPtr& uavMsg)
         if(ns != '/'+def::g_broadcast) { return; } //if it isn't broadcast msg 
         auto newTopicName = topicHelper.deleteFirstSegment();
         topicName = ros::this_node::getNamespace() + newTopicName;
-    } 
+    }
     RosMsgParser::ShapeShifter msg;
     msg.morph(
         uavMsg->MD5Sum,
