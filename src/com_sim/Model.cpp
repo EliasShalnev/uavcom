@@ -9,7 +9,10 @@ Model::Model(const ModelName& modelName)
 
 bool Model::isActive() const
 {
-    for(auto model : m_modelStates.getMessage()->name)
+    auto modelStates = m_modelStates.getMessage();
+    if(modelStates == nullptr) { return false; }        
+
+    for(auto model : modelStates->name)
     {
         if(model == m_modelName) { return true; }
     }
@@ -19,12 +22,15 @@ bool Model::isActive() const
 
 geometry_msgs::Point::ConstPtr Model::getCoordinates() const
 {
-    auto models = m_modelStates.getMessage()->name;
+    auto modelStates = m_modelStates.getMessage(); 
+    if(modelStates == nullptr) { return nullptr; }
+
+    auto models = modelStates->name;
     for(unsigned int i=0; i<models.size(); ++i)
     {
         if(models[i] == m_modelName)
         {   
-            auto pose = new geometry_msgs::Point(m_modelStates.getMessage()->pose[i].position);
+            auto pose = new geometry_msgs::Point(modelStates->pose[i].position);
             return geometry_msgs::Point::ConstPtr(pose);
         }
     }
@@ -34,12 +40,15 @@ geometry_msgs::Point::ConstPtr Model::getCoordinates() const
 
 geometry_msgs::Vector3::ConstPtr Model::getMovementSpeed() const
 {
-    auto models = m_modelStates.getMessage()->name;
+    auto modelStates = m_modelStates.getMessage(); 
+    if(modelStates == nullptr) { return nullptr; }
+
+    auto models = modelStates->name;
     for(unsigned int i=0; i<models.size(); ++i)
     {
         if(models[i] == m_modelName)
         {   
-            auto ms = new geometry_msgs::Vector3(m_modelStates.getMessage()->twist[i].linear);
+            auto ms = new geometry_msgs::Vector3(modelStates->twist[i].linear);
             return geometry_msgs::Vector3::ConstPtr(ms);
         }
     }

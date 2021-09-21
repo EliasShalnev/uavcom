@@ -25,7 +25,12 @@ public:
      */
     boost::shared_ptr<MessageType const> getMessage() const 
     {
-        if(m_subscriber.getNumPublishers() == 0) { return nullptr; }
+        if(m_subscriber.getNumPublishers() == 0) 
+        { 
+            ROS_WARN_STREAM("There is no publishers to " << m_subscriber.getTopic() << " topic.");
+            return nullptr; 
+        }
+        if(m_currentMessage == nullptr) { ROS_WARN_STREAM("There wasn't any message in " << m_subscriber.getTopic() << " topic."); }
         return m_currentMessage;
     }
 
